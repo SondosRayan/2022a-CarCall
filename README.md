@@ -9,10 +9,10 @@
 
 * [ ] Asking for help from nearby drivers, by sending a notification for them.
 * [ ] Notifying a car owner about a problem by scanning their car's license plate.
-* [ ] View help requests of nearby  drivers.
+* [ ] View help requests of nearby  drivers and offer help.
+* [ ] Enabling chat with people who offer help.
 
 ## Complementary features
 
 * [ ] Signup and login with Google.
-* [ ] enabling chat with people who offer help, with the option of disabling it in case of harassment.
 * [ ] Blocking annoying or disrespectful users.

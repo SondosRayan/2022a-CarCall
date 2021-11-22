@@ -14,5 +14,5 @@
 
 ## Complementary features
 
-* [ ] Signup and login with Google.
+* [ ] Signup and login with email.
 * [ ] Blocking annoying or disrespectful users.

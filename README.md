@@ -1,18 +1,16 @@
-# CallCar
+# car_call
 
-> This is an application that serves as a platform for drivers to contact each other and ask for help. 
+A new Flutter project.
 
-## Motivation
- For many drivers when facing minor problems such as flat tire or running out of fuel, seeking help is inconvenient and may take a long time, when there is probably someone around who can help. For many others contacting with the owners of the cars around is needed in case they are blocking their car or taking their private parking spot. We want to help drivers connect easily, using a simple platform.
+## Getting Started
 
-## Core Features
+This project is a starting point for a Flutter application.
 
-* [ ] Asking for help from nearby drivers, by sending a notification for them.
-* [ ] Notifying a car owner about a problem by scanning their car's license plate.
-* [ ] View help requests of nearby  drivers and offer help.
-* [ ] Enabling chat with people who offer help.
+A few resources to get you started if this is your first Flutter project:
 
-## Complementary features
+- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-* [ ] Signup and login with email.
-* [ ] Blocking annoying or disrespectful users.
+For help getting started with Flutter, view our
+[online documentation](https://flutter.dev/docs), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

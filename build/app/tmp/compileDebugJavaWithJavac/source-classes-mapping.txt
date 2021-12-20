@@ -1,4 +1,0 @@
-io/flutter/plugins/GeneratedPluginRegistrant.java
- io.flutter.plugins.GeneratedPluginRegistrant
-com/technion/car_call/BuildConfig.java
- com.technion.car_call.BuildConfig

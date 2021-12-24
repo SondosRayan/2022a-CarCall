@@ -55,6 +55,25 @@ SizedBox makeBox(String text, double width, double height, Color boxColor,
     ),
   );
 }
+SizedBox makeBox2(String text, double width, double height, Color boxColor,
+    Color textColor, double fontSize, Future<Null> Function() onPress){
+  return SizedBox(
+    width: width,
+    height: height,
+    child: Material(
+      color: boxColor,
+      borderRadius: BorderRadius.circular(20.0),
+      child: MaterialButton(
+        // color: Colors.blue,
+        child: Align(
+          alignment: Alignment.center,
+          child: getText(text, textColor, fontSize, true),
+        ),
+        onPressed: onPress,
+      ),
+    ),
+  );
+}
 
 SizedBox makeBoxWithPic(String imagePath, double imageHeight, double imageWidth,
     String text, double width, double height, Color boxColor,

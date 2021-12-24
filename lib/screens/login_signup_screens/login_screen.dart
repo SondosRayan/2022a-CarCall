@@ -1,6 +1,8 @@
 import 'package:car_call/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:car_call/screens/login_signup_screens/signup_screen.dart';
+import 'package:provider/provider.dart';
+import '../../auth_repository.dart';
 import '../home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,11 +13,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-   bool _isSecure=true;
+  bool _isSecure=true;
 @override
   Widget build(BuildContext context) {
+    final firebaseUser = Provider.of<AuthRepository>(context);
     final logo= Image.asset('assets/images/car_call_logo.jpg');
     Size size=MediaQuery.of(context).size;
+
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+
     return Scaffold(
       backgroundColor: blue1,
       body: Center(
@@ -49,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child:TextFormField(
+                    controller: emailController,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.person),
                       border: UnderlineInputBorder(),
@@ -59,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child:TextFormField(
+                    controller: passwordController,
                     obscureText: _isSecure,
                     decoration:  InputDecoration(
                       icon: const Icon(Icons.lock),
@@ -74,13 +83,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 )),
             box,
             //sign in button
-            makeBox('Sign in', MediaQuery.of(context).size.width*0.8, 53,
+            firebaseUser.status == Status.Authenticating
+                ? const Center(child: CircularProgressIndicator())
+                : 
+            makeBox2('Sign in', MediaQuery.of(context).size.width*0.8, 53,
                     green2, Colors.white, 20,
-                    () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MyHomePage()),
-                  );
+                    () async{
+                  bool res = await firebaseUser.signIn(
+                      emailController.text.trim(),
+                      passwordController.text.trim());
+                  if (!res) {
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //     login_error_snackBar);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyHomePage()),
+                    );
+                  }
                 }
             ),
             box,
@@ -138,9 +158,21 @@ class _LoginScreenState extends State<LoginScreen> {
   void _onSignUp(){
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const SignUpScreen()),
+        MaterialPageRoute(builder: (context) => const RegisterScreen()),
       );
   }
+
+  // void _onSignin() async{
+  //   bool res = await firebaseUser.signIn(
+  //       emailController.text.trim(),
+  //       passwordController.text.trim());
+  //   if (!res) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //         login_error_snackBar);
+  //   } else {
+  //     Navigator.pop(context);
+  //   }
+  // }
 }
 
 

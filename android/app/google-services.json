@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "298420621288",
+    "project_id": "carcall-91150",
+    "storage_bucket": "carcall-91150.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298420621288:android:07e0ae416fc14754071e5d",
+        "android_client_info": {
+          "package_name": "com.technion.car_call"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "298420621288-p5bif6c8dnd1u4lp1kmn3vjuk3uhkf0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3QnboFbE5AsH3O_dtHLG_4VaP_oruygg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "298420621288-p5bif6c8dnd1u4lp1kmn3vjuk3uhkf0v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

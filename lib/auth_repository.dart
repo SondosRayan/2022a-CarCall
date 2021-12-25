@@ -37,7 +37,7 @@ class AuthRepository with ChangeNotifier {
       notifyListeners();
       UserCredential? userCredential= await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      print(userCredential.)
+      //print(userCredential.)
       // userProfile.addInfoToUserData(pair, first, second);
       // _user = userCredential.user;
       return userCredential;

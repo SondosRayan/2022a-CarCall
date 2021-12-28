@@ -1,3 +1,4 @@
+import 'package:car_call/screens/login_signup_screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth_repository.dart';
@@ -5,6 +6,16 @@ import '../../globals.dart';
 import '../home_screen.dart';
 import 'login_screen.dart';
 import 'package:pattern_formatter/pattern_formatter.dart';
+
+final TextEditingController emailController = TextEditingController();
+final TextEditingController passwordController = TextEditingController();
+final TextEditingController confirmController = TextEditingController();
+final TextEditingController firstNameController = TextEditingController();
+final TextEditingController lastNameController = TextEditingController();
+final TextEditingController genderController = TextEditingController();
+final TextEditingController birthController = TextEditingController();
+final TextEditingController phoneController = TextEditingController();
+final TextEditingController carController = TextEditingController();
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -16,6 +27,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
+    final firebaseUser = Provider.of<AuthRepository>(context);
     Size size=MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: blue1,
@@ -36,8 +48,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
            TextButton(
             onPressed: () {
               //TODO: addInfoToUserData
-              Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const MyHomePage()));},
+              // var res = firebaseUser.signUp(
+              //     emailController.text.trim().toString(),
+              //     passwordController.text.trim().toString(),
+              //     firstNameController.text.trim().toString(),
+              //     lastNameController.text.trim().toString(),
+              //     // TODO: change female to a dynamic one ***DONE*** :)
+              //     // "Female",
+              //     genderController.text.trim().toString(),
+              //     birthController.text.trim().toString(),
+              //     phoneController.text.trim().toString(),
+              //     carController.text.trim().toString()
+              // );
+              bool isGoogle = firebaseUser.isGoogle;
+              late var res;
+              if(isGoogle){
+                res = firebaseUser.signUpWithGoogle(
+                    firstNameController.text.trim().toString(),
+                    lastNameController.text.trim().toString(),
+                    // TODO: change female to a dynamic one ***DONE*** :)
+                    // "Female",
+                    genderController.text.trim().toString(),
+                    birthController.text.trim().toString(),
+                    phoneController.text.trim().toString(),
+                    carController.text.trim().toString()
+                );
+              }else{
+                res = firebaseUser.completeSignUp(
+                    firstNameController.text.trim().toString(),
+                    lastNameController.text.trim().toString(),
+                    // TODO: change female to a dynamic one ***DONE*** :)
+                    // "Female",
+                    genderController.text.trim().toString(),
+                    birthController.text.trim().toString(),
+                    phoneController.text.trim().toString(),
+                    carController.text.trim().toString()
+                );
+              }
+              if (res == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('There was a problem signing up') )
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyHomePage()),
+                );
+              }
+              // Navigator.push(context,
+              //   MaterialPageRoute(builder: (context) => const MyHomePage()));
+              },
             child: getText('Done', Colors.white, 20, true),
             ),
           ],
@@ -69,19 +129,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Flexible(child: SizedBox(width: size.width*0.5,child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child:TextFormField(
+                          controller: firstNameController,
                           decoration: const InputDecoration(
                             border: UnderlineInputBorder(),
                             labelText: 'First name',
-                          ))
+                          ),
+                        autovalidateMode:
+                        AutovalidateMode.onUserInteraction,
+                      )
                   ))),
                   Flexible(child:  SizedBox(width: size.width*0.5,child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child:TextFormField(
+                          controller: lastNameController,
                           decoration: const InputDecoration(
                             /*fillColor: Colors.white,
                             filled: true,*/
                             border: UnderlineInputBorder(),
-                            labelText: 'First name',
+                            labelText: 'Last name',
                           ))
                   )))
                 ]),
@@ -90,21 +155,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           child:TextFormField(keyboardType: TextInputType.number,
+                              controller: birthController,
                               inputFormatters: [DateInputFormatter(),],
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
                                 labelText: 'Enter your birthday',
-                              ))
+                              )
+                          )
                       ),
                       //gender radio button
-                      const Padding(
+                      const Padding(  // TODO: how to get femal or male ????
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           child:GenderRadio(),
                       ),
                       //phone number
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(keyboardType: TextInputType.number,
+                          child:TextFormField(
+                              controller: phoneController,
+                              keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
                                 labelText: 'Enter your phone number',
@@ -113,7 +182,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       //licence plate
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(keyboardType: TextInputType.number,
+                          child:TextFormField(
+                              controller: carController,
+                              keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
                                 labelText: 'Enter your license plate',
@@ -138,10 +209,14 @@ class _GenderRadioState extends State<GenderRadio> {
     return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const Flexible(child:Text('Gender:',style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ))),
+          const Flexible(
+              child:Text('Gender:',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+              ),
+          ),
           Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -149,130 +224,28 @@ class _GenderRadioState extends State<GenderRadio> {
             title:const Text('Male',style: TextStyle(
               fontSize: 13,
             )),
-            leading: Radio(value: 'Male',groupValue: gender, onChanged: (String? value) { setState(() {
-              gender=value!;
-            }); },),
+            leading: Radio(
+              value: 'Male',
+              groupValue: gender,
+              onChanged: (String? value) {
+                setState(() {
+                  gender=value!;
+                  genderController.text = value;
+                });},
+            ),
           )
           ),
             Flexible(child:ListTile(
               title:const Text('Female',style: TextStyle(
                 fontSize: 13,
               )),
-              leading: Radio(value: 'Female',groupValue: gender, onChanged: (String? value) { setState(() {
+              leading: Radio(value: "Female",groupValue: gender, onChanged: (String? value) { setState(() {
                 gender=value!;
+                genderController.text = value;
               }); },),
             )
             ),]),
         ]);
-  }
-}
-
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
-
-  @override
-  _RegisterScreenState createState() => _RegisterScreenState();
-}
-
-class _RegisterScreenState extends State<RegisterScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final firebaseUser = Provider.of<AuthRepository>(context);
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-    TextEditingController ConfirmController = TextEditingController();
-    Size size=MediaQuery.of(context).size;
-    return Scaffold(
-      backgroundColor: blue1,
-      appBar:
-      AppBar(
-        leadingWidth: 90,
-        centerTitle: true,
-        title: getText('Sign up', Colors.white, 25, true),
-        backgroundColor: green2,
-        leading: TextButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()));
-          },
-          child: getText('Cancel', Colors.white, 20, true),
-        ),
-
-      ),
-      body: Center(
-          child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(15.0),
-              children: <Widget>[
-                Center(
-                    child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                              child: Icon(Icons.person,size: size.width*0.3,),
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                const BorderRadius.all( Radius.circular(100.0)),
-                                border: Border.all(
-                                  color: Colors.black,
-                                  width: 4.0,
-                                ),))
-                          ,
-                          //mail
-                          Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              child:TextFormField(
-                                  controller: emailController,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'Enter your email',
-                                  ))
-                          ),
-                          //password
-                          Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              child:TextFormField(
-                                  controller: passwordController,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'Choose password',
-                                  ))
-                          ),
-                          Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              child:TextFormField(
-                                  controller: ConfirmController,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'Confirm password',
-                                  ))
-                          ),
-                          makeBox2('Continue', MediaQuery.of(context).size.width*0.8, 53,
-                              green2, Colors.white, 20,
-                                  () async{
-                            if(ConfirmController.text.trim() != passwordController.text.trim()){
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Password does not match, please confirm password') ));
-                            }
-                            else{
-                                var res = firebaseUser.signUp(
-                                    emailController.text.trim().toString(),
-                                    passwordController.text.trim().toString());
-                                if (res == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('There was a problem signing up') ));
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                                  );
-                                }
-                              }}
-                          )
-
-
-                        ]))])),
-    );
   }
 }
 

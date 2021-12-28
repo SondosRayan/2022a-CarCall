@@ -1,7 +1,11 @@
+import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../globals.dart';
 import 'get_help_screens/get_help_screen.dart';
+import 'package:car_call/auth_repository.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -11,8 +15,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late AuthRepository firebaseUser;
   @override
   Widget build(BuildContext context) {
+    firebaseUser = Provider.of<AuthRepository>(context);
     return Material(
       child: Container(
         color: Colors.white,
@@ -29,7 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   padding: paddingLeft20,
                   child:
-                  getText('Hello,\nSondos', Colors.black, 38, true),
+                  getText("Hello,\n"+firebaseUser.firstName.toString(),
+                          Colors.black, 38, true),
                 ),
                 const Spacer(),
                 // avatar image to do
@@ -65,11 +72,38 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             box,
             // now building the list
-
-          ],
-        ),
+            // makeBox("sign out", 100, 50, grey, Colors.black, 18, onPress)
+                SizedBox(
+                  width: 100,
+                  height: 50,
+                  child: Material(
+                             color: grey,
+                             borderRadius: BorderRadius.circular(20.0),
+                             child: MaterialButton(
+                                     // color: Colors.blue,
+                                    child: Align(
+                                    alignment: Alignment.center,
+                                    child: getText("sign out", CupertinoColors.black, 18, true),
+                                    ),
+                                    onPressed: _onPress,
+                             ),
+                  )
+          ),
+        ],),
       ),
     );
   }
+
+  Future<void> _onPress() async {
+    const signout_snackBar = SnackBar(
+        content: Text('Successfully logged out'));
+    await firebaseUser.signOut();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(signout_snackBar);
+  }
+
 }
 

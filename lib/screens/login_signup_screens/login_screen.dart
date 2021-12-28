@@ -1,4 +1,5 @@
 import 'package:car_call/globals.dart';
+import 'package:car_call/screens/login_signup_screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:car_call/screens/login_signup_screens/signup_screen.dart';
 import 'package:provider/provider.dart';
@@ -14,14 +15,15 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isSecure=true;
-@override
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
+    // final AuthService _auth = AuthService();
     final firebaseUser = Provider.of<AuthRepository>(context);
     final logo= Image.asset('assets/images/car_call_logo.jpg');
     Size size=MediaQuery.of(context).size;
-
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
       backgroundColor: blue1,
@@ -86,48 +88,67 @@ class _LoginScreenState extends State<LoginScreen> {
             firebaseUser.status == Status.Authenticating
                 ? const Center(child: CircularProgressIndicator())
                 : 
-            makeBox2('Sign in', MediaQuery.of(context).size.width*0.8, 53,
-                    green2, Colors.white, 20,
-                    () async{
-                  bool res = await firebaseUser.signIn(
-                      emailController.text.trim(),
-                      passwordController.text.trim());
-                  if (!res) {
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //     login_error_snackBar);
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MyHomePage()),
-                    );
-                  }
-                }
-            ),
+                makeBox2('Sign in', MediaQuery.of(context).size.width*0.8, 53,
+                        green2, Colors.white, 20,
+                        () async{
+                          bool res = await firebaseUser.signIn(
+                          emailController.text.trim(),
+                          passwordController.text.trim());
+                      if (!res) {
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //     login_error_snackBar);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MyHomePage()),
+                        );
+                      }
+                    }
+                ),
             box,
             // sign in with google button
-            Material(
+            firebaseUser.status == Status.Authenticating2
+                ? const Center(child: CircularProgressIndicator())
+                :
+                Material(
                 borderRadius: BorderRadius.circular(20),
                 color: green2,
                 child:MaterialButton(
-                    minWidth: MediaQuery.of(context).size.width*0.8,
-                    height: 53,
-                    onPressed: (){},
-                    child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Image.asset(
-                            'assets/icons/google_icon.jpg',
-                            height: 40.0,
-                            width: 40.0,
-                          ),
-                          Padding(
-                              padding: paddingLeft10,
-                              child:
-                                  getText('Sign in with Google', Colors.white, 20.0, true),
-                          )
-                        ]
-                    ),
+                  minWidth: MediaQuery.of(context).size.width*0.8,
+                  height: 53,
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/icons/google_icon.jpg',
+                          height: 40.0,
+                          width: 40.0,
+                        ),
+                        Padding(
+                          padding: paddingLeft10,
+                          child:
+                          getText('Sign in with Google', Colors.white, 20.0, true),
+                        )
+                      ]
+                  ),
+                  onPressed: () async{
+                    await firebaseUser.signInWithGoogle();
+                    if (await firebaseUser.signInWithGoogleCheckIfFirstTime()) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                      );
+                      // firstSignUpSheet(context, 3);
+                    } else {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute<void>(
+                              builder: (context) => const MyHomePage()),
+                              (r) => false);
+                    }
+                  },
                 )),
+
             box,
             //sign up button
             Material(

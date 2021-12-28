@@ -97,28 +97,6 @@ class AuthRepository with ChangeNotifier {
   TODO: maybe there is a problem with the authentication
         when i am trying to signup with an existing email there is no error sent
    */
-  /*
-  bool signUp(String email, String password,
-      String firstName,String lastName, String gender,String birthDate,
-      String phoneNumber,String carPlate){
-    if(_isGoogle){
-      if(signUpWithGoogle(firstName, lastName, gender, birthDate,
-          phoneNumber, carPlate) != null){
-        return true;
-      }else{
-        return false;
-      }
-      // return signInWithGoogle();
-    }else{
-      if(signUpNormal(email, password,firstName, lastName, gender, birthDate,
-          phoneNumber, carPlate) != null){
-        return true;
-      }else{
-        return false;
-      }
-    }
-  }
-  */
 
   Future<UserCredential?> signUpWithEmailPass(String email, String password) async {
     try{

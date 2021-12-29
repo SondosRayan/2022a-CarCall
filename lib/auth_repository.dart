@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:car_call/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,13 +89,8 @@ class AuthRepository with ChangeNotifier {
 
   String get avatarURL => _avatarURL;
 
-  // COMPLETE THE REST OF THEM
-
+  // COMPLETE THE REST OF THEM ***DONE***
   /////////////////////////////////////////////////////////////////////////
-  /*
-  TODO: maybe there is a problem with the authentication
-        when i am trying to signup with an existing email there is no error sent
-   */
 
   Future<UserCredential?> signUpWithEmailPass(String email, String password) async {
     try{
@@ -124,8 +118,7 @@ class AuthRepository with ChangeNotifier {
       _birthDate = birthDate;
       _phoneNumber = phoneNumber;
       _carPlate = carPlate;
-      print("i am in complete sign up: ");
-      print(_user);
+
       updateFirebaseUserList();
       notifyListeners(); // ????
       return _user;
@@ -136,8 +129,9 @@ class AuthRepository with ChangeNotifier {
       return null;
     }
   }
+
   ////////////////////////////////////////////////////////////////////////////
-  //  SIGN IN WITH GOOGLE
+  //  SIGN IN METHODS - WITH EMAIL AND PASSWORD || GOOGLE
   ////////////////////////////////////////////////////////////////////////////
   Future<bool> signIn(String email, String password) async {
     try {
@@ -145,7 +139,8 @@ class AuthRepository with ChangeNotifier {
       notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-      //there is more to add for image _avatarURL = await _storage.ref('userImages').child(_user.uid).getDownloadURL();
+      //TODO: there is more to add for image
+      _avatarURL = await _storage.ref('images').child(_user!.uid).getDownloadURL();
       updateLocalUserFields();
       notifyListeners();
       return true;
@@ -174,7 +169,7 @@ class AuthRepository with ChangeNotifier {
     updateLocalUserFields();
   }
 
-  Future<bool> signInWithGoogleCheckIfFirstTime() async {
+  Future<bool> signInFirstTime() async {
     _firebaseFirestore = FirebaseFirestore.instance;
     try {
       final snapShot = await _firebaseFirestore.collection('Users').doc(_user!.uid).get();
@@ -190,32 +185,6 @@ class AuthRepository with ChangeNotifier {
     }
   }
 
-  Future<User?> signUpWithGoogle(String firstName,String lastName,
-      String gender,String birthDate,
-      String phoneNumber,String carPlate) async {
-    try {
-      _status = Status.Authenticating2;
-      // notifyListeners();
-      // UserCredential? userCredential= await _auth.createUserWithEmailAndPassword(
-      //     email: email, password: password);
-      // userProfile.addInfoToUserData(pair, first, second);
-      // _user = userCredential.user;
-      _firstName = firstName;
-      _lastName = lastName;
-      _gender = gender;
-      _birthDate = birthDate;
-      _phoneNumber = phoneNumber;
-      _carPlate = carPlate;
-      updateFirebaseUserList();
-      notifyListeners(); // ????
-      return _user;
-    } catch (e) {
-      print(e);
-      _status = Status.Unauthenticated;
-      notifyListeners();
-      return null;
-    }
-  }
   // END OF SIGN IN FUNCTIONS
   /////////////////////////////////////////////////////////////////////////////
   Future signOut() async {
@@ -237,63 +206,8 @@ class AuthRepository with ChangeNotifier {
     notifyListeners();
   }
 
-  /*
-  my help functions for storing the data
-  addPairToUserData
-  removePairFromUserData
-  getAllSavedSuggestions
-  getAllSavedSuggestionsaddpai
-  getData
-   */
-  /*
-  Future<void> addPairToUserData(WordPair pair, String first, String second)async {
-    if(_status == Status.Authenticated){
-      await _firebaseFirestore.collection('Users').doc(_user!.uid)
-          .collection('Saved Suggestions')
-          .doc(pair.toString())
-          .set({'first': first, 'second': second});
-    }
-    userData = await getAllSavedSuggestions();
-    notifyListeners();
-  }
-*/
-  /*
-  Future<void> removePairFromUserData(WordPair pair) async {
-    if (_status == Status.Authenticated) {
-      await _firebaseFirestore.collection('Users')
-          .doc(_user!.uid)
-          .collection('Saved Suggestions')
-          .doc(pair.toString()).delete();
-      userData = await getAllSavedSuggestions();
-    }
-    notifyListeners();
-  }
-*/
-  /*
-  Future<Set<WordPair>> getAllSavedSuggestions() async {
-    Set<WordPair> savedSuggestions = <WordPair>{};
-    String first, second;
-    await _firebaseFirestore.collection('Users')
-        .doc(_user!.uid)
-        .collection('Saved Suggestions')
-        .get()
-        .then((querySnapshot) {
-      for (var result in querySnapshot.docs) {
-        first = result.data().entries.first.value.toString();
-        second = result.data().entries.last.value.toString();
-        savedSuggestions.add(WordPair(first, second));
-      }
-    });
-    return Future<Set<WordPair>>.value(savedSuggestions);
-  }
-*/
-  /*
-  Set<WordPair> getData() {
-    return userData;
-  }
-*/
-
   Future<String> getImageUrl() async {
+    // return _avatarURL;
     return await _storage.ref('images').child(_user!.uid).getDownloadURL();
   }
 
@@ -305,26 +219,6 @@ class AuthRepository with ChangeNotifier {
     notifyListeners();
   }
 
-  ////////////////////////////
-  /*
-  Future<void> addInfoToUserData(String first, String last, String gender, String birthDate,
-      String phoneNumber, String carPlate)async {
-    // var name = '$first $last';
-    // // await _user.updateProfile()
-    // //updateDisplayName(name).
-    // await _user!.updateDisplayName(name)
-    //     .catchError((error) => print(error));
-    //
-    // await _user!.reload();
-    // _user = _auth.currentUser;
-    // // userData = await getAllInfo();
-    // notifyListeners();
-
-    // final usersCollection = Firestore.instance.collection('users');
-    // return await
-
-  }
-  */
   ///////////////////////////////////////
   // DEALING WITH USER PROFILE
   ///////////////////////////////////////
@@ -343,32 +237,26 @@ class AuthRepository with ChangeNotifier {
     _phoneNumber = list['Info'][4];
     _carPlate = list['Info'][5];
 
-    // try {
-    //   _avatarURL = await FirebaseStorage.instance.ref("userImages")
-    //       .child(_user!.uid)
-    //       .getDownloadURL() ?? defaultAvatar;
-    // } catch (_){
-    //   _avatarURL = defaultAvatar;
-    // }
+    try {
+      _avatarURL = await FirebaseStorage.instance.ref("images")
+          .child(_user!.uid)
+          .getDownloadURL() ?? defaultAvatar;
+    } catch (_){
+      _avatarURL = defaultAvatar;
+    }
 
   }
 
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_gender,_birthDate,_phoneNumber,_carPlate];
     await _firebaseFirestore.collection('Users').doc(_user!.uid).set({'Info':list});
-
-    // _firebaseFirestore.collection('Users').doc(_user!.uid)
-    //     .collection('MyCars')
-    //     .doc('Car Plates').set({carPlate: _carPlate});
-
     notifyListeners();
-    // _firebaseFirestore.collection('Users').doc(_user!.uid)
-    //     .collection('Info')
-    //     .doc('FullName').set({firstName: _firstName, lastName: _lastName});
-
   }
 
-
-
+  void deleteUser(){
+    FirebaseFirestore.instance.collection('Users').doc(_user!.uid).delete().then((_){
+      // delete account on authentication after user data on database is deleted
+    });
+  }
 }
 

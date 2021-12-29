@@ -1,16 +1,19 @@
 import 'package:car_call/screens/scan_car_screens/alert_option_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../auth_repository.dart';
 import '../../globals.dart';
 
 class InsertManuallyScreen extends StatelessWidget{
-  const InsertManuallyScreen();
+   InsertManuallyScreen();
+  late AuthRepository firebaseUser;
+  TextEditingController _license_plate = TextEditingController(text: "");
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    TextEditingController _license_plate = TextEditingController(text: "");
-
+    firebaseUser=Provider.of<AuthRepository>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -50,8 +53,9 @@ class InsertManuallyScreen extends StatelessWidget{
   }
 
   getContinueTapFunction(context){
+    firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
     return (){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const AlertOptionScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) =>  AlertOptionScreen(carNumber:_license_plate.text)));
     };
   }
 

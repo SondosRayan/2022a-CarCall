@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import '../../globals.dart';
 
 class AlertOptionScreen extends StatelessWidget {
-  const AlertOptionScreen({Key? key}) : super(key: key);
+  String carNumber;
+   AlertOptionScreen({Key? key, required this.carNumber})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

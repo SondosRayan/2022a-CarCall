@@ -5,7 +5,7 @@ import '../../globals.dart';
 
 class AlertOptionScreen extends StatelessWidget {
   String carNumber;
-   AlertOptionScreen({Key? key, required this.carNumber})
+  AlertOptionScreen({Key? key, required this.carNumber})
       : super(key: key);
 
   @override
@@ -13,22 +13,22 @@ class AlertOptionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          toolbarHeight: 90,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: true,
-          leading: IconButton(
-            color: green11,
-            onPressed: (){
-              // Navigate back to first route when tapped.
-              Navigator.pop(context);},
-            icon: const Icon(Icons.arrow_back),
-          ),
-          title: Text(
-              'Choose a message to send:',
-              style:TextStyle(color:green11, fontSize: 23, fontWeight: FontWeight.normal),
-              textAlign: TextAlign.left,
-          ),
+        toolbarHeight: 90,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          color: green11,
+          onPressed: (){
+            // Navigate back to first route when tapped.
+            Navigator.pop(context);},
+          icon: const Icon(Icons.arrow_back),
+        ),
+        title: Text(
+          'Choose a message to send:',
+          style:TextStyle(color:green11, fontSize: 23, fontWeight: FontWeight.normal),
+          textAlign: TextAlign.left,
+        ),
       ),
       body: ListView(
         children: [
@@ -57,8 +57,8 @@ class AlertOptionScreen extends StatelessWidget {
 
   Future<void> showOptionDialog(String alertOption, context) async {
     TextSpan dialogText = (alertOption != 'Car Crash')?
-      getDialogText(alertOption):
-      getCarCrashDialogText(alertOption);
+    getDialogText(alertOption):
+    getCarCrashDialogText(alertOption);
 
     return showDialog<void>(
       context: context,
@@ -67,25 +67,25 @@ class AlertOptionScreen extends StatelessWidget {
         return AlertDialog(
           content: SingleChildScrollView(
             child: ListBody( children: <Widget>[
-                RichText(text: dialogText,)
-              ],),
+              RichText(text: dialogText,)
+            ],),
           ),
           actions: <Widget>[Row(
-              children: [
-                TextButton(
-                  child: Text('SEND ALERT', style: TextStyle(color: green11,),),
-                  onPressed: () {},//TODO: send alert to other user
-                ),
-                const Spacer(),
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: green11),),
-                  onPressed: () {Navigator.of(context).pop();},
-                ),
-              ],
-            ),
+            children: [
+              TextButton(
+                child: Text('SEND ALERT', style: TextStyle(color: green11,),),
+                onPressed: () {},//TODO: send alert to other user
+              ),
+              const Spacer(),
+              TextButton(
+                child: Text('CANCEL', style: TextStyle(color: green11),),
+                onPressed: () {Navigator.of(context).pop();},
+              ),
+            ],
+          ),
           ],
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
         );
       },
     );
@@ -120,14 +120,8 @@ class AlertOptionScreen extends StatelessWidget {
             style:TextStyle(color:Colors.grey.shade700, fontSize: 16, fontWeight: FontWeight.normal)
         ),
         getDialogText(alertOption),
-        ],
+      ],
     );
   }
 
 }
-
-
-
-
-
-

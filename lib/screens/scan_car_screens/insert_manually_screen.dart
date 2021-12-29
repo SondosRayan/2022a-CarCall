@@ -7,27 +7,27 @@ import '../../auth_repository.dart';
 import '../../globals.dart';
 
 class InsertManuallyScreen extends StatelessWidget{
-   InsertManuallyScreen();
+  InsertManuallyScreen();
   late AuthRepository firebaseUser;
   TextEditingController _license_plate = TextEditingController(text: "");
 
-   @override
+  @override
   Widget build(BuildContext context) {
     firebaseUser=Provider.of<AuthRepository>(context);
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: green11,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          alignment: Alignment.centerRight,
-        ),
         backgroundColor: Colors.white,
-        elevation: 0,
-      ),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: green11,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            alignment: Alignment.centerRight,
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
         body: Center(
           child: Container(
             padding:  EdgeInsets.all(22),
@@ -53,7 +53,7 @@ class InsertManuallyScreen extends StatelessWidget{
   }
 
   getContinueTapFunction(context){
-    firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
+    // firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
     return (){
       Navigator.push(context, MaterialPageRoute(builder: (context) =>  AlertOptionScreen(carNumber:_license_plate.text)));
     };

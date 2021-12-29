@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Scan Car', 158, 158, blue2, Colors.black, 28,
                         (){ Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ScanCarOptionsScreen()),
+                      MaterialPageRoute(builder: (context) => const ScanCarOptionScreen()),
                     );}
                 ),
                 makeBoxWithPic('assets/images/get help.png', 110, 115,

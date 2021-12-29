@@ -46,6 +46,13 @@ dependencies:
 
   pattern_formatter: ^2.0.0
 
+  simple_ocr_plugin: ^0.1.1
+  camera: ^0.9.4+5
+  path_provider: ^2.0.8
+  path: ^1.8.0
+  flutter_mobile_vision: ^0.1.4+1
+  image_picker: ^0.8.4+4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

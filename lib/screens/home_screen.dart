@@ -48,9 +48,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: paddingRight20,
                       child: CircleAvatar(
                         radius: imageRadius,
-                        backgroundImage: (snapshot.data == null)
-                            ? null
-                            : NetworkImage(snapshot.data!),
+                        // backgroundImage: (snapshot.data == null)
+                        //     ? null
+                        //     : NetworkImage(snapshot.data!),
                       ),
                     );
                   },

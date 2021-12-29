@@ -87,7 +87,7 @@ class AuthRepository with ChangeNotifier {
     _carPlate = value;
   }
 
-  String get avatarURL => _avatarURL;
+  // String get avatarURL => _avatarURL;
 
   // COMPLETE THE REST OF THEM ***DONE***
   /////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ class AuthRepository with ChangeNotifier {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
       //TODO: there is more to add for image
-      _avatarURL = await _storage.ref('images').child(_user!.uid).getDownloadURL();
+      // _avatarURL = await _storage.ref('images').child(_user!.uid).getDownloadURL();
       updateLocalUserFields();
       notifyListeners();
       return true;
@@ -207,8 +207,8 @@ class AuthRepository with ChangeNotifier {
   }
 
   Future<String> getImageUrl() async {
-    // return _avatarURL;
-    return await _storage.ref('images').child(_user!.uid).getDownloadURL();
+    return _avatarURL;
+    // return await _storage.ref('images').child(_user!.uid).getDownloadURL();
   }
 
   Future<void> uploadNewImage(File file)async {
@@ -237,13 +237,13 @@ class AuthRepository with ChangeNotifier {
     _phoneNumber = list['Info'][4];
     _carPlate = list['Info'][5];
 
-    try {
-      _avatarURL = await FirebaseStorage.instance.ref("images")
-          .child(_user!.uid)
-          .getDownloadURL() ?? defaultAvatar;
-    } catch (_){
-      _avatarURL = defaultAvatar;
-    }
+    // try {
+    //   _avatarURL = await FirebaseStorage.instance.ref("images")
+    //       .child(_user!.uid)
+    //       .getDownloadURL() ?? defaultAvatar;
+    // } catch (_){
+    //   _avatarURL = defaultAvatar;
+    // }
 
   }
 

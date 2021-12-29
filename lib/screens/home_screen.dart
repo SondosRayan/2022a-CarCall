@@ -40,13 +40,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 const Spacer(),
                 // avatar image to do
-                Container(
-                  padding: paddingRight20,
-                  child: CircleAvatar(
-                    radius: imageRadius,
-                    // backgroundImage: const AssetImage('assets/images/watermelon.jpg'),
-                  ),
-                )
+                FutureBuilder(
+                  future: firebaseUser.getImageUrl(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<String> snapshot) {
+                    return Container(
+                      padding: paddingRight20,
+                      child: CircleAvatar(
+                        radius: imageRadius,
+                        backgroundImage: (snapshot.data == null)
+                            ? null
+                            : NetworkImage(snapshot.data!),
+                      ),
+                    );
+                  },
+                ),
+
+                // Container(
+                //   padding: paddingRight20,
+                //   child: CircleAvatar(
+                //     radius: imageRadius,
+                //     // backgroundImage: const AssetImage('assets/images/watermelon.jpg'),
+                //   ),
+                // )
               ],
             ),
             box, box,

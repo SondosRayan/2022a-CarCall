@@ -20,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final AuthService _auth = AuthService();
     final firebaseUser = Provider.of<AuthRepository>(context);
     final logo= Image.asset('assets/images/car_call_logo.jpg');
     Size size=MediaQuery.of(context).size;
@@ -98,10 +97,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         // ScaffoldMessenger.of(context).showSnackBar(
                         //     login_error_snackBar);
                       } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MyHomePage()),
-                        );
+                        if (await firebaseUser.signInFirstTime()) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                          );
+                          // firstSignUpSheet(context, 3);
+                        } else {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute<void>(
+                                  builder: (context) => const MyHomePage()),
+                                  (r) => false);
+                        }
                       }
                     }
                 ),
@@ -133,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   onPressed: () async{
                     await firebaseUser.signInWithGoogle();
-                    if (await firebaseUser.signInWithGoogleCheckIfFirstTime()) {
+                    if (await firebaseUser.signInFirstTime()) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const SignUpScreen()),
@@ -182,18 +190,6 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const RegisterScreen()),
       );
   }
-
-  // void _onSignin() async{
-  //   bool res = await firebaseUser.signIn(
-  //       emailController.text.trim(),
-  //       passwordController.text.trim());
-  //   if (!res) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //         login_error_snackBar);
-  //   } else {
-  //     Navigator.pop(context);
-  //   }
-  // }
 }
 
 

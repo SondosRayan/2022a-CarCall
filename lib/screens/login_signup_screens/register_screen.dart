@@ -14,13 +14,19 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  bool _isSecure=true;
-  bool _isSecure2=true;
+  bool _isSecure = true;
+  bool _isSecure2 = true;
+  bool _validateMail = false;
+  bool _validatePassword = false;
+
   late AuthRepository firebaseUser;
+
   @override
   Widget build(BuildContext context) {
     firebaseUser = Provider.of<AuthRepository>(context);
-    Size size=MediaQuery.of(context).size;
+    Size size = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       backgroundColor: blue1,
       appBar:
@@ -31,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: green2,
         leading: TextButton(
           onPressed: () {
+            // Navigator.pop(context);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()));
           },
@@ -43,118 +50,136 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.all(15.0),
           children: <Widget>[
             box,
-            Center(
-                child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                          child: Icon(Icons.person,size: size.width*0.3,),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                            const BorderRadius.all( Radius.circular(100.0)),
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 4.0,
-                            ),)),
-                      box,
-                      //mail text filed
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(
-                              controller: emailController,
-                              decoration: const InputDecoration(
-                                icon: Icon(Icons.person),
-                                border: UnderlineInputBorder(),
-                                labelText: 'Enter your email',
-                              ))
-                      ),
-                      //password text field
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(
-                              controller: passwordController,
-                              obscureText: _isSecure,
-                              decoration:  InputDecoration(
-                                icon: const Icon(Icons.lock),
-                                suffixIcon: IconButton(
-                                  icon:const Icon(Icons.visibility),
-                                  onPressed:(){setState(() {
-                                    _isSecure=!_isSecure;
-                                  });} ,
-                                ) ,
-                                border: const UnderlineInputBorder(),
-                                labelText: 'Enter your password',
-                              )
-                          )),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(
-                              controller: confirmController,
-                              obscureText: _isSecure2,
-                              decoration:  InputDecoration(
-                                icon: const Icon(Icons.lock),
-                                suffixIcon: IconButton(
-                                  icon:const Icon(Icons.visibility),
-                                  onPressed:(){setState(() {
-                                    _isSecure2=!_isSecure2;
-                                  });} ,
-                                ) ,
-                                border: const UnderlineInputBorder(),
-                                labelText: 'Confirm password',
-                              )
-                          )
-                      ),
-                      makeBox2('Continue', MediaQuery.of(context).size.width*0.8, 53,
-                          green2, Colors.white, 20,_onContinue
-                      )
+            Column(
+              children: [
+                Form(
+                  child: Center(
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Container(
+                                child: Icon(
+                                  Icons.person, size: size.width * 0.3,),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                  const BorderRadius.all(Radius.circular(
+                                      100.0)),
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 4.0,
+                                  ),)),
+                            box,
+                            //mail text filed
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 4),
+                              child: TextField(
+                                // validator: (value) => value!.isEmpty
+                                //     ? 'Please Enter an Email Address' : null,
+                                controller: emailController,
+                                decoration: InputDecoration(
+                                  icon: const Icon(Icons.person),
+                                  border: const UnderlineInputBorder(),
+                                  labelText: 'Enter your email',
+                                  errorText: _validateMail
+                                      ? "Email can't be empty"
+                                      : null,
+                                ),
+                              ),
+                            ),
+                            box,
+                            //password text field
+                            Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: TextFormField(
+                                  controller: passwordController,
+                                  obscureText: _isSecure,
+                                  decoration: InputDecoration(
+                                    icon: const Icon(Icons.lock),
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.visibility),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isSecure = !_isSecure;
+                                        });
+                                      },
+                                    ),
+                                    border: const UnderlineInputBorder(),
+                                    labelText: 'Enter your password',
+                                    errorText: _validatePassword
+                                        ? "Password can't be empty"
+                                        : null,
+                                  ),
+                                )),
+                            box,
+                            //confirm button
+                            Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: TextFormField(
+                                    controller: confirmController,
+                                    obscureText: _isSecure2,
+                                    decoration: InputDecoration(
+                                      icon: const Icon(Icons.lock),
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(Icons.visibility),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isSecure2 = !_isSecure2;
+                                          });
+                                        },
+                                      ),
+                                      border: const UnderlineInputBorder(),
+                                      labelText: 'Confirm password',
+                                    )
+                                )
+                            ),
+                            box,
+                            makeBox2(
+                                'Continue',
+                                MediaQuery.of(context).size.width * 0.8,
+                                53,
+                                green2,
+                                Colors.white,
+                                20,
+                                _onContinue
+                            )
 
 
-                    ]))]),
+                          ])),),
+              ],
+            )
+          ]
+      ),
     );
   }
 
-  Future<Null> _onContinue()async{
-      if(confirmController.text.trim() != passwordController.text.trim()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text(
-                'Password does not match, please confirm password')));
-      }
-      else{
-        /* TODO: here I just wanna make sure that the email and password are OK to use
-                                       signing up will be later when I get all the information
-                                       don't forget to add async
-                              */
-        // TODO: navigate to the signup screen to add all the information **DONE**
-        var res = firebaseUser.signUpWithEmailPass(
+  Future<Null> _onContinue() async {
+    if (confirmController.text.trim() != passwordController.text.trim()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(
+              'Password does not match, please confirm password')));
+    }
+    else {
+      setState(() {
+        emailController.text.isEmpty ? _validateMail = true : _validateMail = false;
+        passwordController.text.isEmpty ? _validatePassword = true : _validatePassword = false;
+      });
+      if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+        /*var res = */await firebaseUser.signUpWithEmailPass(
             emailController.text, passwordController.text);
-        if(res == null){
+        if (firebaseUser.user /*res*/ == null) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text(
                   'Error occurred. Please try again!')));
-        }else{
+        } else {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const SignUpScreen()),
           );
         }
-
       }
+    }
   }
 }
-
-/*
-                            else{
-                                var res = firebaseUser.signUp(
-                                    emailController.text.trim().toString(),
-                                    passwordController.text.trim().toString());
-                                if (res == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('There was a problem signing up') ));
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                                  );
-                                }
-                              }}
- */

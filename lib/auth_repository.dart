@@ -6,8 +6,18 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+
 enum Status { Authenticated, Unauthenticated, Authenticating, Authenticating2 }
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
+
+class my_message{
+  late String sender_name;
+  late String type;
+  my_message(String senderName, String Type){
+    sender_name = senderName;
+    type = Type;
+  }
+}
 
 class AuthRepository with ChangeNotifier {
   FirebaseAuth _auth;
@@ -15,19 +25,31 @@ class AuthRepository with ChangeNotifier {
   Status _status = Status.Unauthenticated;
   FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
+  Set<my_message> _alerts = Set<my_message>();
+  Set<my_message> _my_requests = Set<my_message>();
+  Set<my_message> _offers = Set<my_message>();
+  Set<my_message> _requests = Set<my_message>();
+  //MAHA ADDED
+  Set<my_message> get alerts => _alerts;
+  String _user_name = "";
+  String get user_name => _user_name;
 
+
+
+  //until here
   String _firstName = "";
   String _lastName = "";
   String _gender = "";
   String _birthDate = "";
-  String _phoneNumber= "";
+  String _phoneNumber = "";
   String _carPlate = "";
   String _avatarURL = defaultAvatar;
   bool _isGoogle = false;
 
-  AuthRepository.instance() : _auth = FirebaseAuth.instance,
-                              _firebaseFirestore = FirebaseFirestore.instance,
-                              _storage = FirebaseStorage.instance{
+  AuthRepository.instance()
+      : _auth = FirebaseAuth.instance,
+        _firebaseFirestore = FirebaseFirestore.instance,
+        _storage = FirebaseStorage.instance{
     _auth.authStateChanges().listen(_onAuthStateChanged);
     _user = _auth.currentUser;
     _onAuthStateChanged(_user);
@@ -36,6 +58,7 @@ class AuthRepository with ChangeNotifier {
   ///////////////////////////////////////
   // GET & SET FUNCTIONS
   ///////////////////////////////////////
+
   FirebaseFirestore get firebaseFirestore => _firebaseFirestore;
 
   FirebaseStorage get storage => _storage;
@@ -43,11 +66,12 @@ class AuthRepository with ChangeNotifier {
   bool get isGoogle => _isGoogle;
 
   Status get status => _status;
+
   bool get isAuthenticated => status == Status.Authenticated;
 
   User? get user => _user;
 
-  String? getUserEmail(){
+  String? getUserEmail() {
     return _user!.email;
   }
 
@@ -92,15 +116,17 @@ class AuthRepository with ChangeNotifier {
   // COMPLETE THE REST OF THEM ***DONE***
   /////////////////////////////////////////////////////////////////////////
 
-  Future<UserCredential?> signUpWithEmailPass(String email, String password) async {
-    try{
+  Future<UserCredential?> signUpWithEmailPass(String email,
+      String password) async {
+    try {
       _status = Status.Authenticating;
       notifyListeners();
-      UserCredential? userCredential= await _auth.createUserWithEmailAndPassword(
+      UserCredential? userCredential = await _auth
+          .createUserWithEmailAndPassword(
           email: email, password: password);
       notifyListeners();
       return userCredential;
-    }catch(e){
+    } catch (e) {
       print(e);
       _status = Status.Unauthenticated;
       notifyListeners();
@@ -108,9 +134,9 @@ class AuthRepository with ChangeNotifier {
     }
   }
 
-  Future<User?> completeSignUp(
-      String firstName,String lastName, String gender,String birthDate,
-      String phoneNumber,String carPlate) async {
+  Future<User?> completeSignUp(String firstName, String lastName, String gender,
+      String birthDate,
+      String phoneNumber, String carPlate) async {
     try {
       _firstName = firstName;
       _lastName = lastName;
@@ -155,7 +181,8 @@ class AuthRepository with ChangeNotifier {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser!
+        .authentication;
 
     // Create a new credential
     final OAuthCredential credential = GoogleAuthProvider.credential(
@@ -172,14 +199,15 @@ class AuthRepository with ChangeNotifier {
   Future<bool> signInFirstTime() async {
     _firebaseFirestore = FirebaseFirestore.instance;
     try {
-      final snapShot = await _firebaseFirestore.collection('Users').doc(_user!.uid).get();
+      final snapShot = await _firebaseFirestore.collection('Users').doc(
+          _user!.uid).get();
       if (snapShot == null || !snapShot.exists) {
         return true;
       } else {
         updateLocalUserFields();
         return false;
       }
-    } catch(e) {
+    } catch (e) {
       updateLocalUserFields();
       return false;
     }
@@ -211,7 +239,7 @@ class AuthRepository with ChangeNotifier {
     // return await _storage.ref('images').child(_user!.uid).getDownloadURL();
   }
 
-  Future<void> uploadNewImage(File file)async {
+  Future<void> uploadNewImage(File file) async {
     await _storage
         .ref('images')
         .child(_user!.uid)
@@ -223,13 +251,13 @@ class AuthRepository with ChangeNotifier {
   // DEALING WITH USER PROFILE
   ///////////////////////////////////////
   void updateLocalUserFields() async {
-    if(_user == null) return;
+    if (_user == null) return;
     var snapshot = await FirebaseFirestore.instance
         .collection('Users')
         .doc(_user!.uid).get();
     var list = snapshot.data();
-    if(list == null) return;
-    if(list['Info']==null) return;
+    if (list == null) return;
+    if (list['Info'] == null) return;
     _firstName = list['Info'][0];
     _lastName = list['Info'][1];
     _gender = list['Info'][2];
@@ -248,15 +276,144 @@ class AuthRepository with ChangeNotifier {
   }
 
   Future<void> updateFirebaseUserList() async {
-    var list=[_firstName,_lastName,_gender,_birthDate,_phoneNumber,_carPlate];
-    await _firebaseFirestore.collection('Users').doc(_user!.uid).set({'Info':list});
+    var list = [
+      _firstName,
+      _lastName,
+      _gender,
+      _birthDate,
+      _phoneNumber,
+      _carPlate
+    ];
+    await _firebaseFirestore.collection('Users').doc(_user!.uid).set(
+        {
+          'Info': list,
+          'first_name': _firstName,
+          'phoneNumber': _phoneNumber,
+          'carPlate': _carPlate,
+          'registered_at': Timestamp.now()
+        }
+    );
+    print("got here and carPlate = " + _carPlate);
+    await _firebaseFirestore.collection('Cars').doc(_carPlate).set(
+        {'uid': _user!.uid});
+    print("got here and carPlate = " + _carPlate);
+
+    //until here
     notifyListeners();
   }
 
-  void deleteUser(){
-    FirebaseFirestore.instance.collection('Users').doc(_user!.uid).delete().then((_){
+  void deleteUser() {
+    FirebaseFirestore.instance.collection('Users').doc(_user!.uid)
+        .delete()
+        .then((_) {
       // delete account on authentication after user data on database is deleted
     });
+  }
+
+
+  Future<String> getOwner(String car_plate) async {
+    String user_id = "";
+    try{
+      await _firebaseFirestore.collection('Cars').doc(car_plate)
+          .get().then((snapshot) async {
+        if (!snapshot.exists) {
+          user_id = "";
+        }
+        else {
+          var list = snapshot.data();
+          user_id = list!['uid'];
+        }
+      });
+    }
+    catch(e){
+      return "";
+    }
+
+    return user_id;
+  }
+/*
+  void getUserAlerts() async {
+    //get the set
+    Set<my_message> my_alerts = Set<my_message>();
+    String type = "";
+    String name = "";
+    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
+        'Alerts').get().then((QuerySnapshot) {
+          QuerySnapshot.docs.forEach((entry) async {
+            String sender_uid = entry.data().entries.first.value.toString();
+            type = entry.data().entries.last.value.toString();
+            name =  await getUserName(sender_uid);
+            my_alerts.add(my_message(name, type));
+          });
+    });
+    //build the future
+    _alerts = my_alerts;
+  }
+
+
+  getUserOffers() async {
+    //get the set
+    Set<my_message> my_offers = Set<my_message>();
+    String type = "";
+    String name = "";
+    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
+        'Offers').get().then((QuerySnapshot) {
+      QuerySnapshot.docs.forEach((entry) async {
+        String sender_uid = entry.data().entries.first.value.toString();
+        type = entry.data().entries.last.value.toString();
+        name =  await getUserName(sender_uid);
+        my_offers.add(my_message(name, type));
+
+      });
+    });
+    //build the future
+    _offers = my_offers;
+    return my_offers;
+  }
+
+
+  getUserRequests() async {
+    //get the set
+    Set<my_message> my_requests = Set<my_message>();
+    String type = "";
+    String name = "";
+    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
+        'Requests').get().then((QuerySnapshot) {
+      QuerySnapshot.docs.forEach((entry) async {
+        String sender_uid = entry.data().entries.first.value.toString();
+        type = entry.data().entries.last.value.toString();
+        name =  await getUserName(sender_uid);
+        my_requests.add(my_message(name, type));
+
+      });
+    });
+    //build the future
+    _my_requests = my_requests;
+    return my_requests;
+  }
+
+  getAllRequests() async {
+    Set<my_message> all_requests = Set<my_message>();
+    await _firebaseFirestore.collection("Requests").get().then((QuerySnapshot){
+      QuerySnapshot.docs.forEach((entry) async {
+        String sender_uid = entry.data().entries.first.value.toString();
+        String type = entry.data().entries.last.value.toString();
+        String name =  await getUserName(sender_uid);
+        all_requests.add(my_message(name, type));
+      });
+    });
+    _requests = all_requests;
+    return all_requests;
+  }
+
+ */
+
+  Future<String> getUserName(String uidd) async {
+    await _firebaseFirestore.collection('Users').doc(uidd).get().
+    then((snapshot){
+      _user_name = snapshot.get('first_name');
+    });
+    return _user_name;
   }
 }
 

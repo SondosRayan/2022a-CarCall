@@ -1,5 +1,6 @@
 import 'package:car_call/globals.dart';
 import 'package:car_call/screens/login_signup_screens/register_screen.dart';
+import 'package:car_call/screens/notifications/alerts.dart';
 import 'package:flutter/material.dart';
 import 'package:car_call/screens/login_signup_screens/signup_screen.dart';
 import 'package:provider/provider.dart';
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute<void>(
-                                  builder: (context) => const MyHomePage()),
+                                  builder: (context) => const MyHomePage()),//TODO: return this MyHomePage()),
                                   (r) => false);
                         }
                       }

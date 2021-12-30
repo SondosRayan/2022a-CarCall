@@ -1,15 +1,22 @@
 import 'dart:ui';
+import 'package:car_call/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../auth_repository.dart';
 import '../../globals.dart';
+import '../../my_notification.dart';
 
 class AlertOptionScreen extends StatelessWidget {
   String carNumber;
   AlertOptionScreen({Key? key, required this.carNumber})
       : super(key: key);
+  late AuthRepository firebaseUser;
 
   @override
   Widget build(BuildContext context) {
+    firebaseUser = Provider.of<AuthRepository>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -74,7 +81,16 @@ class AlertOptionScreen extends StatelessWidget {
             children: [
               TextButton(
                 child: Text('SEND ALERT', style: TextStyle(color: green11,),),
-                onPressed: () {},//TODO: send alert to other user
+                onPressed: () async{
+                  //Maha added
+                  var sender_uid = FirebaseAuth.instance.currentUser!.uid;
+                  var reciever_uid = await firebaseUser.getOwner(carNumber);
+                  myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
+                      sender_uid , reciever_uid);
+                  await alert_notific.SendAlert();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                  //until here
+                },
               ),
               const Spacer(),
               TextButton(

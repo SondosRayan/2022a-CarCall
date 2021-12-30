@@ -55,7 +55,7 @@ class InsertManuallyScreen extends StatelessWidget{
   getContinueTapFunction(context){
     // firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
     return (){
-      Navigator.push(context, MaterialPageRoute(builder: (context) =>  AlertOptionScreen(carNumber:_license_plate.text)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) =>  AlertOptionScreen(carNumber:_license_plate.text.trim())));
     };
   }
 

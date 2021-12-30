@@ -18,149 +18,163 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with AutomaticKeepAliveClientMixin{
   late AuthRepository firebaseUser;
   final FirebaseFirestore db = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
-
+    super.build(context);
     firebaseUser = Provider.of<AuthRepository>(context);
-    return Material(
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          // we have 4 elements in Column
-          // 1. hello, name & picture
-          // 2. scan car & get help button
-          // 3. requests sentence
-          // 4. all requests
-          children: [
-            box, box,
-            Row(
-              children: [
-                Container(
-                  padding: paddingLeft20,
-                  child:
-                  getText("Hello,\n"+firebaseUser.firstName.toString(),
-                          Colors.black, 38, true),
-                ),
-                const Spacer(),
-                // avatar image to do
-                FutureBuilder(
-                  future: firebaseUser.getImageUrl(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<String> snapshot) {
-                    return Container(
-                      padding: paddingRight20,
-                      child: CircleAvatar(
-                        radius: imageRadius,
-                        // backgroundImage: (snapshot.data == null)
-                        //     ? null
-                        //     : NetworkImage(snapshot.data!),
-                      ),
-                    );
-                  },
-                ),
+    return Scaffold(
+      body: _buildBody(),
+    );
+  }
 
-                // Container(
-                //   padding: paddingRight20,
-                //   child: CircleAvatar(
-                //     radius: imageRadius,
-                //     // backgroundImage: const AssetImage('assets/images/watermelon.jpg'),
-                //   ),
-                // )
-              ],
-            ),
-            box, box,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                makeBoxWithPic('assets/images/camera.png', 107, 105,
-                    'Scan Car', 158, 158, blue2, Colors.black, 28,
-                        (){ Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ScanCarOptionScreen()),
-                    );}
-                ),
-                makeBoxWithPic('assets/images/get help.png', 110, 115,
-                    'Get Help', 158, 158, grey, Colors.black, 28,
-                        (){ Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const GetHelpScreen()),
-                    );}
-                ),
+  Widget? _buildBody() {
+    // TODO: return a widget representing a page
+    return MaterialApp(
+      home: Material(
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            // we have 4 elements in Column
+            // 1. hello, name & picture
+            // 2. scan car & get help button
+            // 3. requests sentence
+            // 4. all requests
+            children: [
+              box, box,
+              Row(
+                children: [
+                  Container(
+                    padding: paddingLeft20,
+                    child:
+                    getText("Hello,\n"+firebaseUser.firstName.toString(),
+                        Colors.black, 38, true),
+                  ),
+                  const Spacer(),
+                  // avatar image to do
+                  FutureBuilder(
+                    future: firebaseUser.getImageUrl(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<String> snapshot) {
+                      return Container(
+                        padding: paddingRight20,
+                        child: CircleAvatar(
+                          radius: imageRadius,
+                          // backgroundImage: (snapshot.data == null)
+                          //     ? null
+                          //     : NetworkImage(snapshot.data!),
+                        ),
+                      );
+                    },
+                  ),
 
-              ],
-            ),
-            box,
-            box,
-            // now building the list
-            // makeBox("sign out", 100, 50, grey, Colors.black, 18, onPress)
-            Text('People Who Need Help', style: TextStyle(
-              color: Colors.black,
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),),
-            Flexible(
-              child: Material(
-                borderRadius: BorderRadius.circular(20),
-                color: blue3,
-                child: StreamBuilder<QuerySnapshot>(
-                      stream: db.collection('Requests').snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else {
-                          return ListView(
-                            children: snapshot.data!.docs.map((doc){
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                                child: Material(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  shadowColor: Colors.black,//Colors.grey.shade200,
-                                  color: Colors.white,
-                                  child: (doc.get('sender') == firebaseUser.user!.uid)? null:
-                                      ListTile(
-                                        title:
-                                        Column(
-                                          children: [
-                                            Text("${doc.get('sender_name')}"+
-                                                    " needs help with ${doc.get('type')}.", style:
-                                            TextStyle(color: Colors.black, fontSize: 20),),
-                                            box,
-                                            Container(
-                                              height: 30,
-                                              child: Material(
-                                                borderRadius: BorderRadius.circular(20.0),
-                                                color: blue6,
-                                                child: TextButton(child: Text('I can help',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-
-                                                  ),),
-                                                  onPressed: () {
-                                                    _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-
-                                      ),
-                                  ),
-                              );
-                            }).toList(),
-                          );
-                        }
-                      },
-                    ),
+                  // Container(
+                  //   padding: paddingRight20,
+                  //   child: CircleAvatar(
+                  //     radius: imageRadius,
+                  //     // backgroundImage: const AssetImage('assets/images/watermelon.jpg'),
+                  //   ),
+                  // )
+                ],
               ),
-            ),
-            
-        ],),
+              box, box,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  makeBoxWithPic('assets/images/camera.png', 107, 105,
+                      'Scan Car', 158, 158, blue2, Colors.black, 28,
+                          (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ScanCarOptionScreen()),
+                            );
+                          }
+                  ),
+                  makeBoxWithPic('assets/images/get help.png', 110, 115,
+                      'Get Help', 158, 158, grey, Colors.black, 28,
+                          (){ Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const GetHelpScreen()),
+                      );}
+                  ),
+
+                ],
+              ),
+              box,
+              // now building the list
+              // makeBox("sign out", 100, 50, grey, Colors.black, 18, onPress)
+              Text('People Who Need Help', style: TextStyle(
+                color: Colors.black,
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),),
+              (firebaseUser.user == null) ? Container() :
+              Flexible(
+                child: Material(
+                  borderRadius: BorderRadius.circular(20),
+                  color: blue3,
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: db.collection('Requests').snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        return ListView(
+                          children: snapshot.data!.docs.map((doc){
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20.0),
+                                shadowColor: Colors.black,//Colors.grey.shade200,
+                                color: Colors.white,
+                                child: (doc.get('sender') == firebaseUser.user!.uid)? null:
+                                ListTile(
+                                  title:
+                                  Column(
+                                    children: [
+                                      Text("${doc.get('sender_name')}"+
+                                          " needs help with ${doc.get('type')}.", style:
+                                      TextStyle(color: Colors.black, fontSize: 20),),
+                                      box,
+                                      Container(
+                                        height: 30,
+                                        child: Material(
+                                          borderRadius: BorderRadius.circular(20.0),
+                                          color: blue6,
+                                          child: TextButton(child: Text('I can help',
+                                            style: TextStyle(
+                                              color: Colors.black,
+
+                                            ),),
+                                            onPressed: () {
+                                              _onOfferHelp(doc.get('type'), context, doc.get('sender'));
+                                            },
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              )
+
+            ],),
+        ),
+
       ),
     );
   }
@@ -224,6 +238,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     ScaffoldMessenger.of(context).showSnackBar(signout_snackBar);
   }
+
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
 }
 

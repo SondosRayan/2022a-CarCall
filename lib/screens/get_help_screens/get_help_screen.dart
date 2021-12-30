@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../globals.dart';
 import '../../my_notification.dart';
 import '../home_screen.dart';
+import '../navigation_bar.dart';
 
 class GetHelpScreen extends StatelessWidget {
   const GetHelpScreen({Key? key}) : super(key: key);
@@ -92,7 +93,7 @@ class GetHelpScreen extends StatelessWidget {
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, "");
                     await m.BroadCastHelpRequest();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  const NavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),

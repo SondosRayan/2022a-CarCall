@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../auth_repository.dart';
 import '../../globals.dart';
 import '../../my_notification.dart';
+import '../navigation_bar.dart';
 
 class AlertOptionScreen extends StatelessWidget {
   String carNumber;
@@ -128,7 +129,7 @@ class AlertOptionScreen extends StatelessWidget {
           TextButton(
             child: Text('Ok', style: TextStyle(color: green11),),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  const NavigationBar()));
             },
           ),
         ],

@@ -1,9 +1,9 @@
-import 'package:car_call/screens/navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth_repository.dart';
 import '../../globals.dart';
+import '../home_screen.dart';
 import 'login_screen.dart';
 import 'package:pattern_formatter/pattern_formatter.dart';
 
@@ -77,7 +77,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   initializeControllers();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NavigationBar()),
+                    MaterialPageRoute(builder: (context) => const MyHomePage()),
                   );
                 }
 

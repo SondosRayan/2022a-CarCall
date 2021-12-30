@@ -106,5 +106,3 @@ SizedBox makeBoxWithPic(String imagePath, double imageHeight, double imageWidth,
   );
 }
 
-
-

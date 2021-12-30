@@ -34,6 +34,7 @@ dependencies:
   firebase_auth: ^3.3.4
   cloud_firestore: ^3.1.5
   firebase_storage: ^10.2.4
+  firebase_messaging: ^11.2.4
 
   google_sign_in: ^5.2.1
 
@@ -84,7 +85,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/images/camera.png
-    - assets/images/thinking.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

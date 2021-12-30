@@ -1,8 +1,8 @@
 # 2022a-CarCall
 
 ##### Table of Contents  
-[Headers](#headers)  
-[Emphasis](#emphasis)  
-...snip...    
+[docs/database](#headers)  
+[doc/setup](#headers)  
+
 <a name="headers"/>
 ## Headers

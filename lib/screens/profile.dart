@@ -24,7 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.build(context);
     return Scaffold(
       body: Center(
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -46,6 +45,27 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             box,
             getText("Profile Screen!\nwait for sprint 2", Colors.black, 20, true),
+            box,
+            Material(
+              color: blue5,
+              borderRadius: BorderRadius.circular(20.0),
+              child: MaterialButton(
+                // color: blue5,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: getText("More Info", Colors.black, 18, true),
+                ),
+                onPressed:(){
+                  showAboutDialog(
+                    context: context,
+                    applicationVersion: '1.0.0',
+                    applicationName: 'CarCall',
+                  /*children: [
+                    Text("blablabla"),
+                  ]*/);
+                }
+              ),
+            ),
           ],
         ),
       ),

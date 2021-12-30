@@ -71,7 +71,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
+      appBar: AppBar(
+        title: getText('Take a picture', Colors.white, 20, true),
+        backgroundColor: green11,
+      ),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
@@ -88,6 +91,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: green11,
         // Provide an onPressed callback.
         onPressed: () async {
           // Take the Picture in a try / catch block. If anything goes wrong,
@@ -135,23 +139,39 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   late final String imagePath;
   _DisplayPictureScreenState(String imagePath){this.imagePath=imagePath;}
   TextEditingController _resultCtrl = TextEditingController();
+  bool _validCar = false;
   @override
   initState(){_onRecogniseTap();}
   @override
   Widget build(BuildContext context) {
     Size size=MediaQuery.of(context).size;
-
+    // setState(() {
+    //   _resultCtrl.text.isEmpty ? _validCar = true : _validCar = false;
+    // });
     return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
+      appBar: AppBar(
+        title: const Text('Display the Picture'),
+        backgroundColor: green11,),
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
-      body: ListView(children: [
-        Container(height: size.height*0.5,child: Image.file(File(imagePath)) ),
-        TextField(controller: _resultCtrl,),
-        makeBox('Continue', 350, 60, blue3, green11, 25, getContinueTapFunction(context)),
-        box,
-        makeBox('Try Again', 350, 60, blue4, green11, 25, getTryAgainTapFunction(context)),
-      ],),
+      body: ListView(
+        padding:  EdgeInsets.all(22),
+        children: [
+          Container(height: size.height*0.5,child: Image.file(File(imagePath)) ),
+          Text('Car Number:', style: TextStyle(color: green11, fontWeight: FontWeight.bold,
+              fontSize: 25)),
+          TextField(
+              decoration: InputDecoration(
+            errorText: _validCar ?"Enter car number" : null,
+            border: UnderlineInputBorder(),
+          ),controller: _resultCtrl,cursorColor: green11, style: TextStyle(color: green11)),
+
+          box,
+          makeBox('Continue', 350, 60, blue3, green11, 25, getContinueTapFunction(context)),
+          box,
+          makeBox('Try Again', 350, 60, blue4, green11, 25, getTryAgainTapFunction(context)),
+        ],),
+
 
     );
   }
@@ -169,8 +189,14 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     };
   }
   getContinueTapFunction(context){
-    return (){
-      Navigator.push(context, MaterialPageRoute(builder: (context) =>  AlertOptionScreen(carNumber:_resultCtrl.text)));
-    };
+    setState(() {
+      _resultCtrl.text.isEmpty ? _validCar = true : _validCar = false;
+    });
+    if(_resultCtrl.text.isNotEmpty){
+      return () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+            AlertOptionScreen(carNumber: _resultCtrl.text)));
+      };
+    }
   }
 }

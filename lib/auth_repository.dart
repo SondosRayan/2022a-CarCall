@@ -13,6 +13,7 @@ const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png'
 class my_message{
   late String sender_name;
   late String type;
+  String to_use = "nothing"; 
   my_message(String senderName, String Type){
     sender_name = senderName;
     type = Type;

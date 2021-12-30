@@ -1,8 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../globals.dart';
-import '../../my_notification.dart';
-import '../home_screen.dart';
 
 class GetHelpScreen extends StatelessWidget {
   const GetHelpScreen({Key? key}) : super(key: key);
@@ -88,11 +85,7 @@ class GetHelpScreen extends StatelessWidget {
               children: [
                 TextButton(
                   child: getText('YES', green11, 16, true),
-                  onPressed: () async {
-                    myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
-                        FirebaseAuth.instance.currentUser!.uid, "");
-                    await m.BroadCastHelpRequest();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                  onPressed: () {
                     // to show another dialog for the GPS
                   },
                 ),

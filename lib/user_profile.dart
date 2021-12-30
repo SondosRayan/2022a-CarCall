@@ -1,33 +1,24 @@
 import 'package:car_call/auth_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-//Maha added
+import 'package:firebase_auth/firebase_auth.dart';
+
 class UserProfile{
-  late String _first_name ;
-  late String _uid ;
-  late String _token;
-  late String _phoneNumber;
+  // late User? user=AuthRepository.instance().user;
+  final String uid;
+  late String name;
+  late String email;
+  late String password;
+  late String gender;
+  late String birthDate; // ?? check
+  late String phoneNumber;
+  late String carPlate;
+  // to add blocked list (list of uid)
 
-  UserProfile(String uid) {
-    Map? info = getInfo(uid) as Map?;
-    _first_name = info!['first_name'];
-    _uid = uid;
-    _token = info['token'];
-    _phoneNumber = info['phoneNumber'];
-  }
+  UserProfile({required this.uid});
 
-  Future<Map?> getInfo(String uid) async {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    var snapshot =  await db.collection('Users').doc(uid).get();
-    return snapshot.data();
-  }
-
-  Map toJson() => {
-    'name': _first_name,
-    'uid': _uid,
-    'token': _token,
-    'phoneNumber': _phoneNumber,
-  };
+  // Future<String> getBirthDate(User user) async {
+  //   await AuthRepository.instance().firebaseFirestore.collection('Users')
+  //       .doc(user!.uid)
+  //       .update({data});
+  // }
 
 }
-
-//until here

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +26,7 @@ class App extends StatelessWidget {
                       textDirection: TextDirection.ltr)));
         }
         if (snapshot.connectionState == ConnectionState.done) {
-          return const MyApp();
+          return MyApp();
         }
         return const Center(child: CircularProgressIndicator());
       },
@@ -33,7 +35,7 @@ class App extends StatelessWidget {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  // const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override

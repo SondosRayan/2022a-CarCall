@@ -1,11 +1,10 @@
 import 'package:car_call/globals.dart';
+import 'package:car_call/screens/navigation_bar.dart';
 import 'package:car_call/screens/login_signup_screens/register_screen.dart';
-import 'package:car_call/screens/notifications/alerts.dart';
 import 'package:flutter/material.dart';
 import 'package:car_call/screens/login_signup_screens/signup_screen.dart';
 import 'package:provider/provider.dart';
 import '../../auth_repository.dart';
-import '../home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -108,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute<void>(
-                                  builder: (context) => const MyHomePage()),//TODO: return this MyHomePage()),
+                                  builder: (context) => NavigationBar()),
                                   (r) => false);
                         }
                       }
@@ -152,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute<void>(
-                              builder: (context) => const MyHomePage()),
+                              builder: (context) => NavigationBar()),
                               (r) => false);
                     }
                   },

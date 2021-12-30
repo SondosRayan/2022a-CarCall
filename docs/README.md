@@ -17,5 +17,5 @@
 * [ ] enabling chat with people who offer help, with the option of disabling it in case of harassment.
 * [ ] Blocking annoying or disrespectful users.
 
-Contents provided:
+Contents provided in docs folder:
 * [ ] database

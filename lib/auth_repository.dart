@@ -313,16 +313,22 @@ class AuthRepository with ChangeNotifier {
 
   Future<String> getOwner(String car_plate) async {
     String user_id = "";
-    await _firebaseFirestore.collection('Cars').doc(car_plate)
-        .get().then((snapshot) async {
-      if (!snapshot.exists) {
-        user_id = "";
-      }
-      else {
-        var list = snapshot.data();
-        user_id = list!['uid'];
-      }
-    });
+    try{
+      await _firebaseFirestore.collection('Cars').doc(car_plate)
+          .get().then((snapshot) async {
+        if (!snapshot.exists) {
+          user_id = "";
+        }
+        else {
+          var list = snapshot.data();
+          user_id = list!['uid'];
+        }
+      });
+    }
+    catch(e){
+      return "";
+    }
+
     return user_id;
   }
 /*

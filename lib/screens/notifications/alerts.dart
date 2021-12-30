@@ -26,13 +26,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         length: 2,
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: green11,
             bottom: const TabBar(
+              indicatorColor: Colors.white,
               tabs: [
                 Tab(icon: Text("Alerts")),
                 Tab(icon: Text("Help Offers")),
               ],
             ),
             title: const Text('Notifications'),
+            centerTitle: true,
+
           ),
           body: TabBarView(
             children: [
@@ -52,7 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           title:
                           Text("Hi ${auth.firstName}, "+
                               "${doc.get('sender_name')}"+
-                              " sent you an alert about ${doc.get('type')}", style:
+                              " sent you an alert about ${doc.get('type')}.", style:
                           TextStyle(color: green11),)                        ),
                       );
                     }).toList(),
@@ -74,10 +78,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         return Card(
                           child: ListTile(
                             title:
-                            Text("Hi ${auth.firstName}, "+
+                            Text("Hi ${auth.firstName}, you received a help offer from "+
                                 "${doc.get('sender_name')}"+
-                                " can help you with ${doc.get('type')}", style:
-                            TextStyle(color: green11),)                          ),
+                                ", regarding your ${doc.get('type')} request", style:
+                            TextStyle(color: green11),)
+                          ),
                         );
                       }).toList(),
                     );

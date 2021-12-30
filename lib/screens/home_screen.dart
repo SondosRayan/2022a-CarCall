@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:provider/provider.dart';
 import '../globals.dart';
 import '../my_notification.dart';
@@ -92,55 +93,71 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             box,
+            box,
             // now building the list
             // makeBox("sign out", 100, 50, grey, Colors.black, 18, onPress)
-                SizedBox(
-                  width: 100,
-                  height: 50,
-                  child: Material(
-                             color: grey,
-                             borderRadius: BorderRadius.circular(20.0),
-                             child: MaterialButton(
-                                     // color: Colors.blue,
-                                    child: Align(
-                                    alignment: Alignment.center,
-                                    child: getText("sign out", CupertinoColors.black, 18, true),
-                                    ),
-                                    onPressed: _onPress,
-                             ),
-                  )
-          ),
+            Text('People Who Need Help', style: TextStyle(
+              color: Colors.black,
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),),
             Flexible(
-              child: StreamBuilder<QuerySnapshot>(
-                    stream: db.collection('Requests').snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else {
-                        return ListView(
-                          children: snapshot.data!.docs.map((doc){
-                            return Card(
-                              color: blue4,
-                              child: (doc.get('sender') == firebaseUser.user!.uid)? null:
-                              ListTile(
-                                title:
-                                Text("Hi ${firebaseUser.firstName}, "+
-                                    "${doc.get('sender_name')}"+
-                                        " asked for help with ${doc.get('type')}", style:
-                                TextStyle(color: green11),),
-                                trailing:TextButton(child: Text('offer help'),
-                                  onPressed: () {
-                                    _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                  },
-                                ),),
+              child: Material(
+                borderRadius: BorderRadius.circular(20),
+                color: blue3,
+                child: StreamBuilder<QuerySnapshot>(
+                      stream: db.collection('Requests').snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return ListView(
+                            children: snapshot.data!.docs.map((doc){
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  shadowColor: Colors.black,//Colors.grey.shade200,
+                                  color: Colors.white,
+                                  child: (doc.get('sender') == firebaseUser.user!.uid)? null:
+                                      ListTile(
+                                        title:
+                                        Column(
+                                          children: [
+                                            Text("${doc.get('sender_name')}"+
+                                                    " needs help with ${doc.get('type')}.", style:
+                                            TextStyle(color: Colors.black, fontSize: 20),),
+                                            box,
+                                            Container(
+                                              height: 30,
+                                              child: Material(
+                                                borderRadius: BorderRadius.circular(20.0),
+                                                color: blue6,
+                                                child: TextButton(child: Text('I can help',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+
+                                                  ),),
+                                                  onPressed: () {
+                                                    _onOfferHelp(doc.get('type'), context, doc.get('sender'));
+                                                  },
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+
+                                      ),
+                                  ),
                               );
-                          }).toList(),
-                        );
-                      }
-                    },
-                  ),
+                            }).toList(),
+                          );
+                        }
+                      },
+                    ),
+              ),
             ),
             
         ],),

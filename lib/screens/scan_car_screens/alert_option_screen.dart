@@ -85,10 +85,14 @@ class AlertOptionScreen extends StatelessWidget {
                   //Maha added
                   var sender_uid = FirebaseAuth.instance.currentUser!.uid;
                   var reciever_uid = await firebaseUser.getOwner(carNumber);
-                  myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
-                      sender_uid , reciever_uid);
-                  await alert_notific.SendAlert();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                  bool found = (reciever_uid == "")? false: true ;
+                  if(found){
+                    myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
+                        sender_uid , reciever_uid);
+                    await alert_notific.SendAlert();
+                  }
+                  _showDialog(context,found);
+
                   //until here
                 },
               ),
@@ -106,6 +110,34 @@ class AlertOptionScreen extends StatelessWidget {
       },
     );
   }
+
+  _showDialog(BuildContext context, bool found){
+    String found_text = "An alert was successully sent.";
+    String not_found_text = "Sorry! car owner was not found.";
+    String dialog_text = found? found_text: not_found_text;
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context)
+    {
+      return AlertDialog(
+        content: SingleChildScrollView(
+            child: Text(dialog_text)
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Ok', style: TextStyle(color: green11),),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+            },
+          ),
+        ],
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20.0))),
+      );
+    });
+  }
+
 
   TextSpan getDialogText(String alertOption){
     return TextSpan(

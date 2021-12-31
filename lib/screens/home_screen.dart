@@ -10,6 +10,7 @@ import '../globals.dart';
 import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
+import 'navigation_bar.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);

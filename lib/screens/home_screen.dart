@@ -209,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage>
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, to);
                     await m.SendHelpOffer();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  NavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),

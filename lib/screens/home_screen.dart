@@ -10,6 +10,7 @@ import '../globals.dart';
 import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
+import 'navigation_bar.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -209,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage>
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, to);
                     await m.SendHelpOffer();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyHomePage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  NavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),

@@ -111,10 +111,12 @@ SizedBox makeBoxWithPic(String imagePath, double imageHeight, double imageWidth,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                imagePath,
-                height: imageHeight,
-                width: imageWidth,
+              Expanded(
+                child: Image.asset(
+                  imagePath,
+                  height: imageHeight,
+                  width: imageWidth,
+                ),
               ),
               getText(text, textColor, fontSize, true),
             ],

@@ -1,8 +1,5 @@
 import 'package:car_call/auth_repository.dart';
-import 'package:car_call/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 //TODO:ADDED
 enum NotificationTitle {Alert, HelpRequest, HelpOffer}
@@ -30,7 +27,6 @@ class myNotification{
       'sender_name': sender_name,
     };
     await db.collection('Users').doc(reciever_id).collection('Alerts').add(_data);
-    //await db.collection('Alerts').add(_data);
   }
 
   Future<void> BroadCastHelpRequest() async {
@@ -40,8 +36,16 @@ class myNotification{
       'sender': sender_id,
       'sender_name': sender_name,
     };
+    DocumentReference<Map<String, dynamic>> doc = await db.collection('Requests').add(_data);
+
+    _data = {
+      'type': _type,
+      'sender': sender_id,
+      'sender_name': sender_name,
+      'request_id' : doc.id,
+    };
+
     await db.collection('Users').doc(sender_id).collection('Requests').add(_data);
-    await db.collection('Requests').add(_data);
   }
 
   Future<void> SendHelpOffer() async {
@@ -52,7 +56,6 @@ class myNotification{
       'sender_name': sender_name,
     };
     await db.collection('Users').doc(reciever_id).collection('Offers').add(_data);
-    //await db.collection('Offers').add(_data);
   }
 
 }

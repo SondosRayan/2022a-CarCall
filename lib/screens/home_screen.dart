@@ -65,9 +65,9 @@ class _MyHomePageState extends State<MyHomePage>
                         padding: paddingRight20,
                         child: CircleAvatar(
                           radius: imageRadius,
-                          // backgroundImage: (snapshot.data == null)
-                          //     ? null
-                          //     : NetworkImage(snapshot.data!),
+                          backgroundImage: (snapshot.data == null)
+                              ? null
+                              : NetworkImage(snapshot.data!),
                         ),
                       );
                     },
@@ -89,11 +89,11 @@ class _MyHomePageState extends State<MyHomePage>
                   makeBoxWithPic('assets/images/camera.png', 107, 105,
                       'Scan Car', 158, 158, blue2, Colors.black, 28,
                           (){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ScanCarOptionScreen()),
-                            );
-                          }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ScanCarOptionScreen()),
+                        );
+                      }
                   ),
                   makeBoxWithPic('assets/images/get help.png', 110, 115,
                       'Get Help', 158, 158, grey, Colors.black, 28,
@@ -246,4 +246,3 @@ class _MyHomePageState extends State<MyHomePage>
   bool get wantKeepAlive => true;
 
 }
-

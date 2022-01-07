@@ -72,6 +72,8 @@ class AuthRepository with ChangeNotifier {
   User? get user => _user;
 
   String? getUserEmail() {
+    // print("check user $_user");
+    if(_user == null) return null;
     return _user!.email;
   }
 

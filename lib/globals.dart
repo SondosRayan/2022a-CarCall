@@ -13,14 +13,26 @@ Color blue5 = const Color.fromRGBO(123,191,200,1); //#7BBFC8
 Color blue6 = const Color.fromRGBO(95,157,165,1);  //#5F9DA5
 
 // TextStyle
-Text getText(String text, Color color ,double fontSize, bool isBold) {
+Text getText(String text, Color color ,double fontSize, bool isBold/*, {bool isCenter=true}*/) {
   return Text(text,
     style: TextStyle(
       color: color,
       fontSize: fontSize,
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
     ),
-    textAlign: TextAlign.center,
+    // textDirection: TextDirection.ltr,
+    // textAlign: isCenter ? TextAlign.center : TextAlign.left,
+  );
+}
+
+Text getTextNoSize(String text, Color color, bool isBold, {bool isCenter=true}) {
+  return Text(text,
+    style: TextStyle(
+      color: color,
+      fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+    ),
+    textDirection: TextDirection.ltr,
+    textAlign: isCenter ? TextAlign.center : TextAlign.left,
   );
 }
 
@@ -30,12 +42,20 @@ EdgeInsets paddingLeft10 = const EdgeInsets.only(left: 10.0);
 EdgeInsets paddingLeft20 = const EdgeInsets.only(left: 20.0);
 EdgeInsets paddingRight20 = const EdgeInsets.only(right: 20.0);
 
+EdgeInsets getPaddingAll(double x){
+  return EdgeInsets.all(x);
+}
+
 // Numbers
 double imageRadius = 50.0;
 
 // Box
 SizedBox box = const SizedBox(height: 20.0);
 SizedBox box9 = const SizedBox(height: 9.0);
+SizedBox getSizeBox(double x){
+  return SizedBox(height: x);
+}
+
 SizedBox makeBox(String text, double width, double height, Color boxColor,
     Color textColor, double fontSize, Null Function()? onPress){
   return SizedBox(

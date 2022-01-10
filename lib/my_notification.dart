@@ -1,12 +1,15 @@
 import 'package:car_call/auth_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dataBase.dart';
 
 //TODO:ADDED
 enum NotificationTitle {Alert, HelpRequest, HelpOffer}
 
+
+
 class myNotification{
 
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final DocumentReference<Map<String, dynamic>> db = getDB();
   final AuthRepository auth = AuthRepository.instance();
   late String _type;
   late Map<String, dynamic> _data;
@@ -20,17 +23,19 @@ class myNotification{
   }
 
   Future<void> SendAlert() async {
-    String sender_name = await auth.getUserName(sender_id);
+    String sender_name = await auth.getUserDetail(sender_id, 'first_name');
+    String phone_number = await auth.getUserDetail(sender_id, 'phoneNumber');
     _data = {
       'type': _type,
       'sender': sender_id,
       'sender_name': sender_name,
+      'phoneNumber' : phone_number,
     };
     await db.collection('Users').doc(reciever_id).collection('Alerts').add(_data);
   }
 
   Future<void> BroadCastHelpRequest() async {
-    String sender_name = await auth.getUserName(sender_id);
+    String sender_name = await auth.getUserDetail(sender_id, 'first_name');
     _data = {
       'type': _type,
       'sender': sender_id,
@@ -49,7 +54,7 @@ class myNotification{
   }
 
   Future<void> SendHelpOffer() async {
-    String sender_name = await auth.getUserName(sender_id);
+    String sender_name = await auth.getUserDetail(sender_id, 'first_name');
     _data = {
       'type': _type,
       'sender': sender_id,

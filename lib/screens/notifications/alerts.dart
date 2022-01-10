@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../../dataBase.dart';
 import '../../globals.dart';
+
+
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -15,9 +17,8 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  Set<my_message> _alerts = <my_message>{};
   late AuthRepository auth ;
-  final db = FirebaseFirestore.instance;
+  final db = getDB();
 
   @override
   Widget build(BuildContext context){
@@ -85,6 +86,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             +" sent you an alert about ", style: TextStyle(color: green11),),
                                           TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
                                           TextSpan(text: ".", style: TextStyle(color: green11),),
+                                          TextSpan(text: (doc.get('type') == 'Car Crash')?
+                                              "You can contact ${doc.get('sender_name')} on this phone number "
+                                              +doc.get('phoneNumber')+"."
+                                              : null, style: TextStyle(color: green11) ),
                                         ]
                                     ),
                                   )
@@ -134,5 +139,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),        );
   }
+
+
 
 }

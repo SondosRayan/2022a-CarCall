@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../globals.dart';
+import '../dataBase.dart';
 import 'get_help_screens/get_help_screen.dart';
 
 class RequestsScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class RequestsScreen extends StatefulWidget {
 
 class _RequestsScreenState extends State<RequestsScreen> {
   late AuthRepository auth ;
-  final db = FirebaseFirestore.instance;
+  final db = getDB();
 
   @override
   Widget build(BuildContext context){

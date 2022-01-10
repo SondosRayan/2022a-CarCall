@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:provider/provider.dart';
+import '../dataBase.dart';
 import '../globals.dart';
 import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
@@ -22,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin{
   late AuthRepository firebaseUser;
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final DocumentReference<Map<String, dynamic>> db = getDB();
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +149,8 @@ class _MyHomePageState extends State<MyHomePage>
               ),
               (firebaseUser.user == null) ? Container() :
               Flexible(
-                  child: Material(
+                  fit: FlexFit.tight,
+                  child: Container(
                     color: blue3,
                     child: StreamBuilder<QuerySnapshot>(
                       stream: db.collection('Requests').snapshots(),

@@ -6,9 +6,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'dataBase.dart';
+
 
 enum Status { Authenticated, Unauthenticated, Authenticating, Authenticating2 }
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
+
+
 
 class my_message{
   late String sender_name;
@@ -23,16 +27,11 @@ class AuthRepository with ChangeNotifier {
   FirebaseAuth _auth;
   User? _user;
   Status _status = Status.Unauthenticated;
-  FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+  DocumentReference<Map<String, dynamic>> _firebaseFirestore =getDB();
   FirebaseStorage _storage = FirebaseStorage.instance;
-  Set<my_message> _alerts = Set<my_message>();
-  Set<my_message> _my_requests = Set<my_message>();
-  Set<my_message> _offers = Set<my_message>();
-  Set<my_message> _requests = Set<my_message>();
+
   //MAHA ADDED
-  Set<my_message> get alerts => _alerts;
-  String _user_name = "";
-  String get user_name => _user_name;
+  String _field_value = "";
 
 
 
@@ -48,7 +47,7 @@ class AuthRepository with ChangeNotifier {
 
   AuthRepository.instance()
       : _auth = FirebaseAuth.instance,
-        _firebaseFirestore = FirebaseFirestore.instance,
+        _firebaseFirestore = getDB(),
         _storage = FirebaseStorage.instance{
     _auth.authStateChanges().listen(_onAuthStateChanged);
     _user = _auth.currentUser;
@@ -59,7 +58,7 @@ class AuthRepository with ChangeNotifier {
   // GET & SET FUNCTIONS
   ///////////////////////////////////////
 
-  FirebaseFirestore get firebaseFirestore => _firebaseFirestore;
+  DocumentReference<Map<String, dynamic>> get firebaseFirestore => _firebaseFirestore;
 
   FirebaseStorage get storage => _storage;
 
@@ -139,6 +138,7 @@ class AuthRepository with ChangeNotifier {
   Future<User?> completeSignUp(String firstName, String lastName, String gender,
       String birthDate,
       String phoneNumber, String carPlate) async {
+    print("GENDERRRR : "+gender);
     try {
       _firstName = firstName;
       _lastName = lastName;
@@ -169,7 +169,7 @@ class AuthRepository with ChangeNotifier {
       _status = Status.Authenticated;
       //TODO: there is more to add for image
       // _avatarURL = await _storage.ref('images').child(_user!.uid).getDownloadURL();
-      updateLocalUserFields();
+      await updateLocalUserFields();
       notifyListeners();
       return true;
     } catch (e) {
@@ -195,22 +195,22 @@ class AuthRepository with ChangeNotifier {
     _status = Status.Authenticated;
     _user = FirebaseAuth.instance.currentUser;
     _isGoogle = true;
-    updateLocalUserFields();
+    await updateLocalUserFields();
   }
 
   Future<bool> signInFirstTime() async {
-    _firebaseFirestore = FirebaseFirestore.instance;
+    _firebaseFirestore = getDB();
     try {
       final snapShot = await _firebaseFirestore.collection('Users').doc(
           _user!.uid).get();
       if (snapShot == null || !snapShot.exists) {
         return true;
       } else {
-        updateLocalUserFields();
+        await updateLocalUserFields();
         return false;
       }
     } catch (e) {
-      updateLocalUserFields();
+      await updateLocalUserFields();
       return false;
     }
   }
@@ -232,7 +232,7 @@ class AuthRepository with ChangeNotifier {
       _user = firebaseUser;
       _status = Status.Authenticated;
     }
-    updateLocalUserFields();
+    await updateLocalUserFields();
     notifyListeners();
   }
 
@@ -252,53 +252,40 @@ class AuthRepository with ChangeNotifier {
   ///////////////////////////////////////
   // DEALING WITH USER PROFILE
   ///////////////////////////////////////
-  void updateLocalUserFields() async {
+  Future<void> updateLocalUserFields() async {
     if (_user == null) return;
-    var snapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(_user!.uid).get();
-    var list = snapshot.data();
-    if (list == null) return;
-    if (list['Info'] == null) return;
-    _firstName = list['Info'][0];
-    _lastName = list['Info'][1];
-    _gender = list['Info'][2];
-    _birthDate = list['Info'][3];
-    _phoneNumber = list['Info'][4];
-    _carPlate = list['Info'][5];
 
-    // try {
-    //   _avatarURL = await FirebaseStorage.instance.ref("images")
-    //       .child(_user!.uid)
-    //       .getDownloadURL() ?? defaultAvatar;
-    // } catch (_){
-    //   _avatarURL = defaultAvatar;
-    // }
 
+    try{
+      await _firebaseFirestore.collection('Users').doc(user!.uid).get().
+      then((snapshot) {
+        _firstName = snapshot.data()!['first_name'];
+        _lastName = snapshot.get('last_name');
+        _gender = snapshot.get('gender');
+        _birthDate = snapshot.get('birthDate');
+        _phoneNumber = snapshot.get('phoneNumber');
+        _carPlate = snapshot.get('carPlate');
+      });
+    } catch(e){
+      print(e);
+    }
   }
 
   Future<void> updateFirebaseUserList() async {
-    var list = [
-      _firstName,
-      _lastName,
-      _gender,
-      _birthDate,
-      _phoneNumber,
-      _carPlate
-    ];
+
     await _firebaseFirestore.collection('Users').doc(_user!.uid).set(
         {
-          'Info': list,
           'first_name': _firstName,
+          'last_name': _lastName,
+          'gender' : _gender,
+          'birthDate' : _birthDate,
           'phoneNumber': _phoneNumber,
           'carPlate': _carPlate,
-          'registered_at': Timestamp.now()
         }
     );
     print("got here and carPlate = " + _carPlate);
     await _firebaseFirestore.collection('Cars').doc(_carPlate).set(
         {'uid': _user!.uid});
-    print("got here and carPlate = " + _carPlate);
 
     //until here
     notifyListeners();
@@ -333,89 +320,29 @@ class AuthRepository with ChangeNotifier {
 
     return user_id;
   }
-/*
-  void getUserAlerts() async {
-    //get the set
-    Set<my_message> my_alerts = Set<my_message>();
-    String type = "";
-    String name = "";
-    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
-        'Alerts').get().then((QuerySnapshot) {
-          QuerySnapshot.docs.forEach((entry) async {
-            String sender_uid = entry.data().entries.first.value.toString();
-            type = entry.data().entries.last.value.toString();
-            name =  await getUserName(sender_uid);
-            my_alerts.add(my_message(name, type));
-          });
-    });
-    //build the future
-    _alerts = my_alerts;
-  }
 
 
-  getUserOffers() async {
-    //get the set
-    Set<my_message> my_offers = Set<my_message>();
-    String type = "";
-    String name = "";
-    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
-        'Offers').get().then((QuerySnapshot) {
-      QuerySnapshot.docs.forEach((entry) async {
-        String sender_uid = entry.data().entries.first.value.toString();
-        type = entry.data().entries.last.value.toString();
-        name =  await getUserName(sender_uid);
-        my_offers.add(my_message(name, type));
-
-      });
-    });
-    //build the future
-    _offers = my_offers;
-    return my_offers;
-  }
-
-
-  getUserRequests() async {
-    //get the set
-    Set<my_message> my_requests = Set<my_message>();
-    String type = "";
-    String name = "";
-    await _firebaseFirestore.collection("Users").doc(_user!.uid).collection(
-        'Requests').get().then((QuerySnapshot) {
-      QuerySnapshot.docs.forEach((entry) async {
-        String sender_uid = entry.data().entries.first.value.toString();
-        type = entry.data().entries.last.value.toString();
-        name =  await getUserName(sender_uid);
-        my_requests.add(my_message(name, type));
-
-      });
-    });
-    //build the future
-    _my_requests = my_requests;
-    return my_requests;
-  }
-
-  getAllRequests() async {
-    Set<my_message> all_requests = Set<my_message>();
-    await _firebaseFirestore.collection("Requests").get().then((QuerySnapshot){
-      QuerySnapshot.docs.forEach((entry) async {
-        String sender_uid = entry.data().entries.first.value.toString();
-        String type = entry.data().entries.last.value.toString();
-        String name =  await getUserName(sender_uid);
-        all_requests.add(my_message(name, type));
-      });
-    });
-    _requests = all_requests;
-    return all_requests;
-  }
-
- */
-
-  Future<String> getUserName(String uidd) async {
+  Future<String> getUserDetail(String uidd, String field) async {
     await _firebaseFirestore.collection('Users').doc(uidd).get().
     then((snapshot){
-      _user_name = snapshot.get('first_name');
+      _field_value = snapshot.get(field);
     });
-    return _user_name;
+    return _field_value;
   }
+
+  Future<void> addToken(String token) async {
+
+    if(token == null) {
+      print('!!!!! Token Is Null !!!!!');
+      return;
+    }
+    await _firebaseFirestore.collection('Tokens').doc(token).set(
+        {'uid': _user!.uid});
+    await _firebaseFirestore.collection('Users').doc(user!.uid).collection('tokens').doc(token).set(
+        {'registerd_at': Timestamp.now()});
+    }
+
+
+
 }
 

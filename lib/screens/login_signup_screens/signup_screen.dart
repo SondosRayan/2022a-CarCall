@@ -12,7 +12,7 @@ final TextEditingController passwordController = TextEditingController();
 final TextEditingController confirmController = TextEditingController();
 final TextEditingController firstNameController = TextEditingController();
 final TextEditingController lastNameController = TextEditingController();
-final TextEditingController genderController = TextEditingController();
+TextEditingController genderController = TextEditingController();
 final TextEditingController birthController = TextEditingController();
 final TextEditingController phoneController = TextEditingController();
 final TextEditingController carController = TextEditingController();
@@ -33,32 +33,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       backgroundColor: blue1,
       appBar:
-        AppBar(
-          leadingWidth: 90,
-          centerTitle: true,
-          title: getText('Sign up', Colors.white, 25, true),
-          backgroundColor: green2,
-          leading: TextButton(
-            child: getText('Cancel', Colors.white, 20, true),
-            onPressed: () {
-              initializeControllers();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()));
-            },
-          ),
-          actions: [
-           TextButton(
+      AppBar(
+        leadingWidth: 90,
+        centerTitle: true,
+        title: getText('Sign up', Colors.white, 25, true),
+        backgroundColor: green2,
+        leading: TextButton(
+          child: getText('Cancel', Colors.white, 20, true),
+          onPressed: () {
+            initializeControllers();
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()));
+          },
+        ),
+        actions: [
+          TextButton(
             child: getText('Done', Colors.white, 20, true),
             onPressed: () {
               bool flag = firstNameController.text.isNotEmpty &&
                   lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty &&
-                  lastNameController.text.isNotEmpty;
+                  birthController.text.isNotEmpty &&
+                  phoneController.text.isNotEmpty &&
+                  carController.text.isNotEmpty ;
               late Future<User?> res;
+              print("I am in sign up genderController is: " + genderController.text);
               if (flag) {
                 res = firebaseUser.completeSignUp(
                     firstNameController.text.trim().toString(),
@@ -87,96 +85,96 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         'Please fill all the needed information!')));
               }
             },
-            ),
-          ],
-        ),
-        body: Center(
+          ),
+        ],
+      ),
+      body: Center(
 
-            child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(15.0),
-                children: <Widget>[
-            Center(
+          child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(15.0),
+              children: <Widget>[
+                Center(
                     child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                        child: Icon(Icons.person,size: size.width*0.3,),
-                        decoration: BoxDecoration(
-                          borderRadius:
-                            const BorderRadius.all( Radius.circular(100.0)),
-                          border: Border.all(
-                          color: Colors.black,
-                          width: 4.0,
-                        ),))
-                      ,
-                      //full name
-                      Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Flexible(child: SizedBox(width: size.width*0.5,child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      child:TextFormField(
-                          controller: firstNameController,
-                          decoration: const InputDecoration(
-                            border: UnderlineInputBorder(),
-                            labelText: 'First name',
-                          ),
-                        autovalidateMode:
-                        AutovalidateMode.onUserInteraction,
-                      )
-                  ))),
-                  Flexible(child:  SizedBox(width: size.width*0.5,child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      child:TextFormField(
-                          controller: lastNameController,
-                          decoration: const InputDecoration(
-                            border: UnderlineInputBorder(),
-                            labelText: 'Last name',
-                          ))
-                  )))
-                ]),
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                              child: Icon(Icons.person,size: size.width*0.3,),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                const BorderRadius.all( Radius.circular(100.0)),
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 4.0,
+                                ),))
+                          ,
+                          //full name
+                          Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Flexible(child: SizedBox(width: size.width*0.5,child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    child:TextFormField(
+                                      controller: firstNameController,
+                                      decoration: const InputDecoration(
+                                        border: UnderlineInputBorder(),
+                                        labelText: 'First name',
+                                      ),
+                                      autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                    )
+                                ))),
+                                Flexible(child:  SizedBox(width: size.width*0.5,child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    child:TextFormField(
+                                        controller: lastNameController,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                          labelText: 'Last name',
+                                        ))
+                                )))
+                              ]),
 
-                      //birthday
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(keyboardType: TextInputType.number,
-                              controller: birthController,
-                              inputFormatters: [DateInputFormatter(),],
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Enter your birthday',
+                          //birthday
+                          Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              child:TextFormField(keyboardType: TextInputType.number,
+                                  controller: birthController,
+                                  inputFormatters: [DateInputFormatter(),],
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                    labelText: 'Enter your birthday',
+                                  )
                               )
-                          )
-                      ),
-                      //gender radio button
-                      const Padding(  // TODO: how to get female or male ***DONE***
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:GenderRadio(),
-                      ),
-                      //phone number
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(
-                              controller: phoneController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Enter your phone number',
-                              ))
-                      ),
-                      //licence plate
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child:TextFormField(
-                              controller: carController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Enter your license plate',
-                              ))
-                      ),
-                    ]))])),
+                          ),
+                          //gender radio button
+                          const Padding(  // TODO: how to get female or male ***DONE***
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            child:GenderRadio(),
+                          ),
+                          //phone number
+                          Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              child:TextFormField(
+                                  controller: phoneController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                    labelText: 'Enter your phone number',
+                                  ))
+                          ),
+                          //licence plate
+                          Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              child:TextFormField(
+                                  controller: carController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                    labelText: 'Enter your license plate',
+                                  ))
+                          ),
+                        ]))])),
     );
   }
 
@@ -186,7 +184,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     confirmController.text = "";
     firstNameController.text ="";
     lastNameController.text = "";
-    genderController.text = "";
+    genderController.text = "Female";
     birthController.text = "";
     phoneController.text = "";
     carController.text = "";
@@ -205,46 +203,51 @@ class _GenderRadioState extends State<GenderRadio> {
 
   @override
   Widget build(BuildContext context) {
-    genderController.text= "Female";
+    // genderController.text= "Female";
+
     return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           const Flexible(
-              child:Text('Gender:',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
+            child:Text('Gender:',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
               ),
+            ),
           ),
           Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Flexible(child:ListTile(
-            title:const Text('Male',style: TextStyle(
-              fontSize: 13,
-            )),
-            leading: Radio(
-              value: 'Male',
-              groupValue: gender,
-              onChanged: (String? value) {
-                setState(() {
-                  gender=value!;
-                  genderController.text = value;
-                });},
-            ),
-          )
-          ),
-            Flexible(child:ListTile(
-              title:const Text('Female',style: TextStyle(
-                fontSize: 13,
-              )),
-              leading: Radio(value: "Female",groupValue: gender, onChanged: (String? value) { setState(() {
-                gender=value!;
-                genderController.text = value;
-              }); },),
-            )
-            ),]),
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Flexible(child:ListTile(
+                  title:const Text('Male',style: TextStyle(
+                    fontSize: 13,
+                  )),
+                  leading: Radio(
+                    value: 'Male',
+                    groupValue: gender,
+                    onChanged: (String? value) {
+                      setState(() {
+                        gender=value!;
+                        genderController.text = value;
+                        print("the gender in setState of Male is: " + genderController.text);
+                      });},
+                  ),
+                )
+                ),
+                Flexible(child:ListTile(
+                  title:const Text('Female',style: TextStyle(
+                    fontSize: 13,
+                  )),
+                  leading: Radio(value: "Female",groupValue: gender,
+                    onChanged: (String? value) {
+                      setState(() {
+                        gender=value!;
+                        genderController.text = value;
+                        print("the gender in setState of Female is: " + genderController.text);
+                      }); },),
+                )
+                ),]),
         ]);
   }
 }

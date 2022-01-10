@@ -38,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Scaffold(
       backgroundColor: blue1,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Center(
           child: getText('My Profile', Colors.white, 30, true),
         ),

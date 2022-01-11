@@ -5,8 +5,6 @@ import 'dataBase.dart';
 //TODO:ADDED
 enum NotificationTitle {Alert, HelpRequest, HelpOffer}
 
-
-
 class myNotification{
 
   final DocumentReference<Map<String, dynamic>> db = getDB();

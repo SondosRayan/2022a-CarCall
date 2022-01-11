@@ -76,7 +76,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   borderRadius:BorderRadius.all(Radius.circular(10.0))),
                               child: ListTile(
                                   trailing: IconButton(icon: Icon(Icons.block), color: green11,
-                                    onPressed: (){},
+                                    onPressed: (){
+                                      _showBlockDialog(doc.get('sender'), context);
+                                    },
                                   ),
                                   title:
                                   RichText(
@@ -139,6 +141,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),        );
   }
+
+  Future<void> _showBlockDialog(String to_Block, context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody( children: <Widget>[
+              Text('Are you sure you want to block this user?')
+            ],
+            ),
+          ),
+          actions: <Widget>[Row(
+            children: [
+              TextButton(
+                child: Text('Yes', style: TextStyle(color: green11,),),
+                onPressed: () async{
+                  auth.blockUser(to_Block, 'annoying alerts');
+                  Navigator.of(context).pop();
+                },
+              ),
+              const Spacer(),
+              TextButton(
+                child: Text('No', style: TextStyle(color: green11),),
+                onPressed: () {Navigator.of(context).pop();},
+              ),
+            ],
+          ),
+          ],
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+        );
+      },
+    );
+  }
+
 
 
 

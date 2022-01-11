@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auth_repository.dart';
+import 'blocked.dart';
 import 'login_signup_screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     firebaseUser = Provider.of<AuthRepository>(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final fullName = firebaseUser.firstName + firebaseUser.lastName;
+    final fullName = firebaseUser.firstName + " " + firebaseUser.lastName;
     final email = firebaseUser.getUserEmail();
     late var email1;
     email==null ? email1=" " : email1=email;
@@ -197,9 +198,15 @@ class _ProfileScreenState extends State<ProfileScreen>
                         children: [
                           getText('Blocked: ', green11, 25, false),
                           Spacer(),
-                          Icon(
-                            Icons.arrow_forward_ios,
+                          IconButton(
+                            icon : Icon(Icons.arrow_forward_ios),
                             color: green11,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const BlockedScreen()),
+                              );
+                            },
                           ),
                         ],
                       ),

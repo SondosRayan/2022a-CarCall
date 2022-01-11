@@ -199,7 +199,7 @@ class GenderRadio extends StatefulWidget {
 }
 
 class _GenderRadioState extends State<GenderRadio> {
-  String gender="Female";
+  String gender="";
 
   @override
   Widget build(BuildContext context) {

@@ -340,8 +340,35 @@ class AuthRepository with ChangeNotifier {
         {'uid': _user!.uid});
     await _firebaseFirestore.collection('Users').doc(user!.uid).collection('tokens').doc(token).set(
         {'registerd_at': Timestamp.now()});
-    }
+  }
 
+  void blockUser(String toBlock_uid, String why) async {
+
+    String first_name = await getUserDetail(toBlock_uid, 'first_name');
+    String last_name = await getUserDetail(toBlock_uid, 'last_name');
+    await _firebaseFirestore.collection('Users').doc(_user!.uid).collection('blocked').doc(toBlock_uid)
+        .set({
+      'why': why,
+      'name' : first_name + " " + last_name,
+        });
+  }
+
+  void unBlockUser(String toUnBlock_uid) async {
+    await _firebaseFirestore.collection('Users').doc(_user!.uid).collection('blocked').doc(toUnBlock_uid).delete();
+  }
+
+  Future<bool> isUnBlocked(String uidd) async {
+    if(uidd == "") return false;
+
+    bool unblocked = true;
+    await _firebaseFirestore.collection('Users').doc(_user!.uid)
+        .collection('blocked').doc(uidd).get().then((snapshot) => {
+          if(snapshot.exists) {
+            unblocked = false
+          }
+    });
+    return unblocked;
+  }
 
 
 }

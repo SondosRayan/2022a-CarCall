@@ -2,9 +2,11 @@ import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import '../dataBase.dart';
 import '../globals.dart';
@@ -12,6 +14,7 @@ import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
 import 'navigation_bar.dart';
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -24,6 +27,16 @@ class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin{
   late AuthRepository firebaseUser;
   final DocumentReference<Map<String, dynamic>> db = getDB();
+
+  void initState() {
+    super.initState();
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    messaging.getToken().then((token) {
+      firebaseUser.addToken(token!);
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {

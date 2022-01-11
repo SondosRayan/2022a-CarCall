@@ -87,12 +87,13 @@ class AlertOptionScreen extends StatelessWidget {
                   var sender_uid = FirebaseAuth.instance.currentUser!.uid;
                   var reciever_uid = await firebaseUser.getOwner(carNumber);
                   bool found = (reciever_uid == "")? false: true ;
-                  if(found){
+                  bool unBlocked = await firebaseUser.isUnBlocked(reciever_uid);
+                  if(found && unBlocked){
                     myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
                         sender_uid , reciever_uid);
                     await alert_notific.SendAlert();
                   }
-                  _showDialog(context,found);
+                  _showDialog(context,found && unBlocked);
 
                   //until here
                 },
@@ -112,10 +113,10 @@ class AlertOptionScreen extends StatelessWidget {
     );
   }
 
-  _showDialog(BuildContext context, bool found){
-    String found_text = "An alert was successully sent.";
+  _showDialog(BuildContext context, bool ok){
+    String ok_text = "An alert was successully sent.";
     String not_found_text = "Sorry! car owner was not found.";
-    String dialog_text = found? found_text: not_found_text;
+    String dialog_text = ok? ok_text: not_found_text;
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!

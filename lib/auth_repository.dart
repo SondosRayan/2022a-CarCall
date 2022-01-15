@@ -12,6 +12,12 @@ import 'dataBase.dart';
 enum Status { Authenticated, Unauthenticated, Authenticating, Authenticating2 }
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
+const String femaleDefaultAvatar =
+    'https://static.vecteezy.com/system/resources/thumbnails/001/993/889/small/beautiful-latin-woman-avatar-character-icon-free-vector.jpg';
+const String maleDefaultAvatar =
+    "https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg";
+
+
 
 
 class my_message{
@@ -237,6 +243,8 @@ class AuthRepository with ChangeNotifier {
   }
 
   Future<String> getImageUrl() async {
+    if(_gender == "Female") return femaleDefaultAvatar;
+    else if(_gender == "Male") return maleDefaultAvatar;
     return _avatarURL;
     // return await _storage.ref('images').child(_user!.uid).getDownloadURL();
   }
@@ -369,7 +377,6 @@ class AuthRepository with ChangeNotifier {
     });
     return unblocked;
   }
-
 
 }
 

@@ -47,7 +47,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: db.collection('Users').doc(auth.user!.uid)
-            .collection('Requests').snapshots(),
+            .collection('Requests').orderBy('timestamp', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -56,22 +56,36 @@ class _RequestsScreenState extends State<RequestsScreen> {
           } else {
             return ListView(
               children: snapshot.data!.docs.map((doc){
+                Timestamp notification_time = doc.get('timestamp');
+                DateTime notification_date = notification_time.toDate();
+                Duration diff = DateTime.now().difference(notification_date);
+                String stringTimeAgo = getDifference(diff);
                 return Card(
                   shape: RoundedRectangleBorder(borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                  child: ListTile(
-                    trailing: IconButton(icon: Icon(Icons.delete), color: blue6,
-                      onPressed: () async {
-                        await confirmDeleteDialog(doc, context);
-                      },),
-                      title: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(text: "You asked for help with ", style: TextStyle(color: green11),),
-                            TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                            TextSpan(text: ".", style: TextStyle(color: green11),),
-                          ]
-                        ),
-                      ),),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        trailing: IconButton(icon: Icon(Icons.delete), color: blue6,
+                          onPressed: () async {
+                            await confirmDeleteDialog(doc, context);
+                          },),
+                          title: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "You asked for help with ", style: TextStyle(color: green11),),
+                                TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                TextSpan(text: ".", style: TextStyle(color: green11),),
+                              ]
+                            ),
+                          ),),
+                      Container(
+                        alignment: Alignment.bottomRight,
+                        child: getText(
+                            stringTimeAgo + "   ",
+                            Colors.blueGrey, 11, false),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             );
@@ -132,5 +146,43 @@ class _RequestsScreenState extends State<RequestsScreen> {
     await db.collection('Requests').doc(request_id).delete();
     print("request deleted successfully!"); //TODO: implement delete request!
   }
+
+  String getDifference(Duration diff){
+    int DaysAgo = diff.inDays;
+    int HoursAgo = diff.inHours;
+    int MinutesAgo = diff.inMinutes;
+    int secondsAgo = diff.inSeconds;
+    String stringTimeAgo = "";
+    if(DaysAgo > 0){
+      if(HoursAgo == 1){
+        stringTimeAgo = DaysAgo.toString()+" Day Ago";
+      }else{
+        stringTimeAgo = DaysAgo.toString()+" Days Ago";
+      }
+    }
+    else if(HoursAgo > 0){
+      if(HoursAgo == 1){
+        stringTimeAgo = HoursAgo.toString()+" Hour Ago";
+      }else{
+        stringTimeAgo = HoursAgo.toString()+" Hours Ago";
+      }
+    }
+    else if(MinutesAgo >0){
+      if(HoursAgo == 1){
+        stringTimeAgo = MinutesAgo.toString()+" Minute Ago";
+      }else{
+        stringTimeAgo = MinutesAgo.toString()+" Minutes Ago";
+      }
+    }
+    else if(secondsAgo >=3){
+      stringTimeAgo = secondsAgo.toString()+" Seconds Ago";
+    }
+    else{
+      stringTimeAgo = "just now";
+    }
+    return stringTimeAgo;
+  }
+
+
 
 }

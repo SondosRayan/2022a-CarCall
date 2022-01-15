@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../dataBase.dart';
 import '../../globals.dart';
+import 'package:intl/intl.dart';
 
 
 
@@ -62,7 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   StreamBuilder<QuerySnapshot>(
                     stream: db.collection('Users').doc(auth.user!.uid)
-                        .collection('Alerts').snapshots(),
+                        .collection('Alerts').orderBy('timestamp', descending: true).snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(
@@ -71,30 +72,51 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       } else {
                         return ListView(
                           children: snapshot.data!.docs.map((doc){
+                            Timestamp notification_time = doc.get('timestamp');
+                            DateTime notification_date = notification_time.toDate();
+                            Duration diff = DateTime.now().difference(notification_date);
+                            String stringTimeAgo = getDifference(diff);
+
                             return Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                              child: ListTile(
-                                  trailing: IconButton(icon: Icon(Icons.block), color: green11,
-                                    onPressed: (){
-                                      _showBlockDialog(doc.get('sender'), context);
-                                    },
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                      trailing: IconButton(icon: Icon(Icons.block), color: green11,
+                                        onPressed: (){
+                                          _showBlockDialog(doc.get('sender'), context);
+                                        },
+                                      ),
+                                      title:
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
+                                                +" sent you an alert about ", style: TextStyle(color: green11),),
+                                              TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                              TextSpan(text: ".", style: TextStyle(color: green11),),
+                                              TextSpan(text: (doc.get('type') == 'Car Crash')?
+                                                  "You can contact ${doc.get('sender_name')} on this phone number "
+                                                  +doc.get('phoneNumber')+"."
+                                                  : null, style: TextStyle(color: green11) ),
+                                            ]
+                                        ),
+                                      )
                                   ),
-                                  title:
-                                  RichText(
-                                    text: TextSpan(
+                                  Column(
+                                    children: [
+                                      Column(
                                         children: [
-                                          TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
-                                            +" sent you an alert about ", style: TextStyle(color: green11),),
-                                          TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                                          TextSpan(text: ".", style: TextStyle(color: green11),),
-                                          TextSpan(text: (doc.get('type') == 'Car Crash')?
-                                              "You can contact ${doc.get('sender_name')} on this phone number "
-                                              +doc.get('phoneNumber')+"."
-                                              : null, style: TextStyle(color: green11) ),
-                                        ]
-                                    ),
-                                  )
+                                          Container(
+                                            alignment: Alignment.bottomRight,
+                                            child: getText( stringTimeAgo+ "   ",Colors.blueGrey, 11, false),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             );
                           }).toList(),
@@ -113,22 +135,35 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       } else {
                         return ListView(
                           children: snapshot.data!.docs.map((doc){
+                            Timestamp notification_time = doc.get('timestamp');
+                            DateTime notification_date = notification_time.toDate();
+                            Duration diff = DateTime.now().difference(notification_date);
+                            String stringTimeAgo = getDifference(diff);
+
                             return Card(
                               shape: RoundedRectangleBorder(borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                              child: ListTile(
-                                trailing: IconButton(icon: Icon(Icons.chat),color: green11, onPressed: () {},),
-                                  title:
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "Hi ${auth.firstName}, you received a help offer from "
-                                              +"${doc.get('sender_name')}, regarding your ",
-                                            style: TextStyle(color: green11),),
-                                          TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                                          TextSpan(text: " request.", style: TextStyle(color: green11),),
-                                        ]
-                                    ),
-                                  )
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    trailing: IconButton(icon: Icon(Icons.chat),color: green11, onPressed: () {},),
+                                      title:
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Hi ${auth.firstName}, you received a help offer from "
+                                                  +"${doc.get('sender_name')}, regarding your ",
+                                                style: TextStyle(color: green11),),
+                                              TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                              TextSpan(text: " request.", style: TextStyle(color: green11),),
+                                            ]
+                                        ),
+                                      )
+                                  ),
+                                  Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: getText( stringTimeAgo + "   ",Colors.blueGrey, 11, false),
+                                  ),
+                                ],
                               ),
                             );
                           }).toList(),
@@ -177,6 +212,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
     );
   }
+
+  String getDifference(Duration diff){
+    int DaysAgo = diff.inDays;
+    int HoursAgo = diff.inHours;
+    int MinutesAgo = diff.inMinutes;
+    int secondsAgo = diff.inSeconds;
+    String stringTimeAgo = "";
+    if(DaysAgo > 0){
+      if(HoursAgo == 1){
+        stringTimeAgo = DaysAgo.toString()+" Day Ago";
+      }else{
+        stringTimeAgo = DaysAgo.toString()+" Days Ago";
+      }
+    }
+    else if(HoursAgo > 0){
+      if(HoursAgo == 1){
+        stringTimeAgo = HoursAgo.toString()+" Hour Ago";
+      }else{
+        stringTimeAgo = HoursAgo.toString()+" Hours Ago";
+      }
+    }
+    else if(MinutesAgo >0){
+      if(HoursAgo == 1){
+        stringTimeAgo = MinutesAgo.toString()+" Minute Ago";
+      }else{
+        stringTimeAgo = MinutesAgo.toString()+" Minutes Ago";
+      }
+    }
+    else if(secondsAgo >=3){
+      stringTimeAgo = secondsAgo.toString()+" Seconds Ago";
+    }
+    else{
+      stringTimeAgo = "just now";
+    }
+    return stringTimeAgo;
+  }
+
 
 
 

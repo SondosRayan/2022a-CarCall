@@ -1,5 +1,4 @@
 import 'package:car_call/globals.dart';
-import 'package:car_call/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -29,6 +29,7 @@ class myNotification{
       'sender_name': sender_name,
       'phoneNumber' : phone_number,
       'timestamp': Timestamp.now(),
+      'read' : false,
     };
     await db.collection('Users').doc(reciever_id).collection('Alerts').add(_data);
   }
@@ -62,6 +63,7 @@ class myNotification{
       'sender': sender_id,
       'sender_name': sender_name,
       'timestamp': Timestamp.now(),
+      'read' : false,
     };
     await db.collection('Users').doc(reciever_id).collection('Offers').add(_data);
   }

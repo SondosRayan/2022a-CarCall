@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../dataBase.dart';
 import '../../globals.dart';
-import 'package:intl/intl.dart';
+import '../navigation_bar.dart';
 
+Set<String> UnreadNotifications = Set<String>();
 
 
 class NotificationsScreen extends StatefulWidget {
@@ -17,25 +18,22 @@ class NotificationsScreen extends StatefulWidget {
   _NotificationsScreenState createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsScreenState extends State<NotificationsScreen>{
   late AuthRepository auth ;
   final db = getDB();
+
+
 
   @override
   Widget build(BuildContext context){
     auth = Provider.of<AuthRepository>(context);
+
     return Scaffold(
       backgroundColor: blue1,
           appBar: AppBar(
             backgroundColor: green11,
             automaticallyImplyLeading: false,
-            /*bottom: const TabBar(
-              indicatorColor: Colors.white,
-              tabs: [
-                Tab(icon: Text("Alerts")),
-                Tab(icon: Text("Help Offers")),
-              ],
-            ),*/
+
             title: const Text('Notifications'),
             centerTitle: true,
 
@@ -76,50 +74,63 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             DateTime notification_date = notification_time.toDate();
                             Duration diff = DateTime.now().difference(notification_date);
                             String stringTimeAgo = getDifference(diff);
+                            if(doc.get('read') == false){
+                              UnreadNotifications.add('A'+doc.id);
+                            }
 
-                            return Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                      trailing: IconButton(icon: Icon(Icons.block), color: green11,
-                                        onPressed: (){
-                                          _showBlockDialog(doc.get('sender'), context);
-                                        },
-                                      ),
-                                      title:
-                                      RichText(
-                                        text: TextSpan(
-                                            children: [
-                                              TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
-                                                +" sent you an alert about ", style: TextStyle(color: green11),),
-                                              TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                                              TextSpan(text: ".", style: TextStyle(color: green11),),
-                                              TextSpan(text: (doc.get('type') == 'Car Crash')?
-                                                  "You can contact ${doc.get('sender_name')} on this phone number "
-                                                  +doc.get('phoneNumber')+"."
-                                                  : null, style: TextStyle(color: green11) ),
-                                            ]
-                                        ),
-                                      )
-                                  ),
-                                  Column(
+                            return GestureDetector(
+                              onTap: () => {
+                                setState(() {
+                                  doc.reference.update({'read': true});
+                                  UnreadNotifications.remove('A'+doc.id);
+                                })
+                              },
+                              child: Card(
+                                color : (doc.get('read') == true? Colors.white : blue2),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:BorderRadius.all(Radius.circular(10.0))),
+                                  child: Column(
                                     children: [
+                                      ListTile(
+                                          trailing: IconButton(icon: Icon(Icons.block), color: green11,
+                                            onPressed: (){
+                                              _showBlockDialog(doc.get('sender'), context);
+                                            },
+                                          ),
+                                          title:
+                                          RichText(
+                                            text: TextSpan(
+                                                children: [
+                                                  TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
+                                                    +" sent you an alert about ", style: TextStyle(color: green11),),
+                                                  TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                                  TextSpan(text: ".", style: TextStyle(color: green11),),
+                                                  TextSpan(text: (doc.get('type') == 'Car Crash')?
+                                                      "You can contact ${doc.get('sender_name')} on this phone number "
+                                                      +doc.get('phoneNumber')+"."
+                                                      : null, style: TextStyle(color: green11) ),
+                                                ]
+                                            ),
+                                          )
+                                      ),
                                       Column(
                                         children: [
-                                          Container(
-                                            alignment: Alignment.bottomRight,
-                                            child: getText( stringTimeAgo+ "   ",Colors.blueGrey, 11, false),
+                                          Column(
+                                            children: [
+                                              Container(
+                                                alignment: Alignment.bottomRight,
+                                                child: getText( stringTimeAgo+ "   ",Colors.blueGrey, 11, false),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
                             );
                           }).toList(),
+
                         );
                       }
                     },
@@ -139,31 +150,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             DateTime notification_date = notification_time.toDate();
                             Duration diff = DateTime.now().difference(notification_date);
                             String stringTimeAgo = getDifference(diff);
+                            if(doc.get('read') == false){
+                              UnreadNotifications.add('O'+doc.id);
+                            }
 
-                            return Card(
-                              shape: RoundedRectangleBorder(borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    trailing: IconButton(icon: Icon(Icons.chat),color: green11, onPressed: () {},),
-                                      title:
-                                      RichText(
-                                        text: TextSpan(
-                                            children: [
-                                              TextSpan(text: "Hi ${auth.firstName}, you received a help offer from "
-                                                  +"${doc.get('sender_name')}, regarding your ",
-                                                style: TextStyle(color: green11),),
-                                              TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                                              TextSpan(text: " request.", style: TextStyle(color: green11),),
-                                            ]
-                                        ),
-                                      )
-                                  ),
-                                  Container(
-                                    alignment: Alignment.bottomRight,
-                                    child: getText( stringTimeAgo + "   ",Colors.blueGrey, 11, false),
-                                  ),
-                                ],
+                            return GestureDetector(
+                              onTap: () => {
+                                setState(() {
+                                  doc.reference.update({'read': true});
+                                  UnreadNotifications.remove('O'+doc.id);
+                                })
+                              },
+                              child: Card(
+                                color : (doc.get('read') == true? Colors.white : blue2),
+                                shape: RoundedRectangleBorder(borderRadius:BorderRadius.all(Radius.circular(10.0))),
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      trailing: IconButton(icon: Icon(Icons.chat),color: green11, onPressed: () {},),
+                                        title:
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Hi ${auth.firstName}, you received a help offer from "
+                                                    +"${doc.get('sender_name')}, regarding your ",
+                                                  style: TextStyle(color: green11),),
+                                                TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                                TextSpan(text: " request.", style: TextStyle(color: green11),),
+                                              ]
+                                          ),
+                                        )
+                                    ),
+                                    Container(
+                                      alignment: Alignment.bottomRight,
+                                      child: getText( stringTimeAgo + "   ",Colors.blueGrey, 11, false),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }).toList(),

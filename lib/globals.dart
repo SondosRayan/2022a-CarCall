@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+// delete
+s50(context) => MediaQuery.of(context).size.width * 0.023 * 6;
+s25(context) => s50(context) / 2;
+s10(context) => s50(context) / 5;
+s5(context) => s10(context) / 2;
+
 //Colors
 Color grey = const Color.fromRGBO(207,216,220,1);
 Color lightGreen1 = const Color.fromRGBO(36,202,198,1);

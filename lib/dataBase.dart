@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 DocumentReference<Map<String, dynamic>> getDB(){

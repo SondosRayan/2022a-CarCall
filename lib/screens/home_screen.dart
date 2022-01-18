@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import '../dataBase.dart';
 import '../globals.dart';
@@ -25,17 +26,123 @@ class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin{
   late AuthRepository firebaseUser;
   final DocumentReference<Map<String, dynamic>> db = getDB();
+  double current_lat=0;
+  double current_lon=0;
+  String defaultLocation="52.2165157, 6.9437819";
+  double my_radius=20;
+  TextEditingController radius_controller =TextEditingController();
+
+  double getDistance(String location){
+    double lat=double.parse(location.split(",")[0]);
+    double lon=double.parse(location.split(",")[1]);
+    double distance =  Geolocator.distanceBetween(current_lat, current_lon, lat, lon)/1000;
+    distance = double.parse((distance).toStringAsFixed(1));
+    return distance;
+  }
+  bool isFar(String location) {
+    double distance =  getDistance(location);
+    if(distance.abs() > my_radius) {
+      return true;
+    }
+    return false;
+  }
+  Future<Position>_getCurrentLocation() async {
+
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+  setLocation() async {
+    Position loc = await _getCurrentLocation();
+    setState(() {
+      current_lat = loc.latitude;
+      current_lon = loc.longitude;
+
+    });
+  }
+  selectRadius(){
+    radius_controller.text="$my_radius";
+    return AlertDialog(
+      content: SingleChildScrollView(
+        child: ListBody( children: <Widget>[
+          TextFormField(
+              keyboardType: TextInputType.number,
+              controller: radius_controller,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.edit),
+                border: UnderlineInputBorder(),
+                labelText: 'Edit your radius',
+              ))
+        ],),
+      ),
+      actions: <Widget>[Row(
+        children: [
+          TextButton(
+            child: Text('OK', style: TextStyle(color: green11,),),
+            onPressed: () async{
+              setState(() {
+                my_radius=double.parse(radius_controller.text.toString());
+                my_radius = double.parse((my_radius).toStringAsFixed(1));
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+          const Spacer(),
+          TextButton(
+            child: Text('CANCEL', style: TextStyle(color: green11),),
+            onPressed: () {Navigator.of(context).pop();},
+          ),
+        ],
+      ),
+      ],
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20.0))),
+    );
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     messaging.getToken().then((token) {
       firebaseUser.addToken(token!);
     });
+    setLocation();
+    setState(() {
+      radius_controller.text="$my_radius";
+    });
   }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -146,14 +253,17 @@ class _MyHomePageState extends State<MyHomePage>
                 width:size.width,
                 padding: const EdgeInsets.only(top: 10.0),
                 child:Column(
-                  children: [
-                    Text('People Who Need Help',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  children: [Row(mainAxisAlignment:MainAxisAlignment.center,children:[  Text('People Who Need Help',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                    Container(alignment:Alignment.centerRight,child:IconButton(icon:Icon(Icons.settings,color: green11,), onPressed: () { showDialog(context: context,  builder:(BuildContext context) {return selectRadius(); });},))
+                  ]
+                  )
+
                   ],
                 ),
                 decoration: BoxDecoration(color:blue3,borderRadius:BorderRadius.only(topLeft:Radius.circular(20),topRight:Radius.circular(20),bottomLeft: Radius.zero,bottomRight: Radius.zero)),
@@ -174,7 +284,16 @@ class _MyHomePageState extends State<MyHomePage>
                           return ListView(
                             shrinkWrap: true,
                             children: snapshot.data!.docs.map((doc){
-                              return (doc.get('sender') == firebaseUser.user!.uid)
+                              late String location;
+                              try{
+                                location=doc.get('location');
+                              }
+                              catch(e) {
+                                location=defaultLocation;
+                                //print("***error in location**");
+                              };
+                              //if(location==""){location=defaultLocation;}
+                              return ((doc.get('sender') == firebaseUser.user!.uid)||isFar(location))
                                   ? Wrap() :
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
@@ -191,19 +310,41 @@ class _MyHomePageState extends State<MyHomePage>
                                         box,
                                         Container(
                                           height: 30,
-                                          // i can help button
-                                          child: Material(
-                                            borderRadius: BorderRadius.circular(20.0),
-                                            color: blue6,
-                                            child: TextButton(child: Text('I can help',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),),
-                                              onPressed: () {
-                                                _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                              },
-                                            ),
-                                          ),
+                                          child: Center(child:Row(mainAxisAlignment:MainAxisAlignment.center,
+                                              children: [
+                                                // View location button
+                                                Material(
+                                                    borderRadius: BorderRadius.circular(20.0), color: blue6,
+                                                    child: MaterialButton(
+                                                      onPressed: () {
+                                                        //TODO LOCATION ON MAP*********
+                                                      },
+                                                      child:Row(children:[Icon(Icons.location_on), Text('View Location',
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                        ),),
+                                                      ]),
+                                                    )),
+                                                SizedBox(width: 20,),
+                                                // i can help button
+                                                Material(
+                                                  borderRadius: BorderRadius.circular(20.0),
+                                                  color: blue6,
+                                                  child:TextButton(child: Text('I can help',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),),
+                                                    onPressed: () {
+                                                      _onOfferHelp(doc.get('type'), context, doc.get('sender'));
+                                                    },
+                                                  ),
+                                                ),
+                                              ]
+                                          )),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.bottomRight,
+                                          child: getText( ""+getDistance(location).toString()+" km away"+ "   ",Colors.blueGrey, 11, false),
                                         ),
                                       ],
                                     ),
@@ -252,9 +393,9 @@ class _MyHomePageState extends State<MyHomePage>
                   child: getText('YES', green11, 16, true),
                   onPressed: () async {
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
-                        FirebaseAuth.instance.currentUser!.uid, to);
+                        FirebaseAuth.instance.currentUser!.uid, to,"");
                     await m.SendHelpOffer();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  NavigationBar()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),
@@ -291,123 +432,3 @@ class _MyHomePageState extends State<MyHomePage>
 
 }
 
-//Sondos
-/*
-Flexible(
-                child: Material(
-                  // borderRadius: BorderRadius.circular(20),
-                  color: blue3,
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: db.collection('Requests').snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else {
-                        return ListView(
-                          children: snapshot.data!.docs.map((doc){
-                            return Padding(
-                              padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                              child: Material(
-                                borderRadius: BorderRadius.circular(20.0),
-                                shadowColor: Colors.black,//Colors.grey.shade200,
-                                color: Colors.white,
-                                child: (doc.get('sender') == firebaseUser.user!.uid)? null:
-                                ListTile(
-                                  title:
-                                  Column(
-                                    children: [
-                                      Text("${doc.get('sender_name')}"+
-                                          " needs help with ${doc.get('type')}.", style:
-                                      TextStyle(color: Colors.black, fontSize: 20),),
-                                      box,
-                                      Container(
-                                        height: 30,
-                                        child: Material(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: blue6,
-                                          child: TextButton(child: Text('I can help',
-                                            style: TextStyle(
-                                              color: Colors.black,
-
-                                            ),),
-                                            onPressed: () {
-                                              _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                            },
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      }
-                    },
-                  ),
-                ),
-              )
- */
-
-//Esraa
-/*
-Flexible(
-                  child: Material(
-                    color: blue3,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: db.collection('Requests').snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else {
-                          return ListView(
-                            shrinkWrap: true,
-                            children: snapshot.data!.docs.map((doc){
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                                child: Card(
-                                  shape: RoundedRectangleBorder(/*side:BorderSide(color: Colors.grey,width: 2.0),*/borderRadius:BorderRadius.all(Radius.circular(20))),
-                                  shadowColor: Colors.black,//Colors.grey.shade200,
-                                  color: Colors.white,
-                                  child: (doc.get('sender') == firebaseUser.user!.uid)
-                                      ? null : ListTile(
-                                    title: Column(
-                                      children: [
-                                        Text("${doc.get('sender_name')}"+
-                                            " needs help with ${doc.get('type')}.", style:
-                                        TextStyle(color: Colors.black, fontSize: 20),),
-                                        box,
-                                        Container(
-                                          height: 30,
-                                          // i can help button
-                                          child: Material(
-                                            borderRadius: BorderRadius.circular(20.0),
-                                            color: blue6,
-                                            child: TextButton(child: Text('I can help',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),),
-                                              onPressed: () {
-                                                _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        }
-                      },
-                    ),
-                  ))
- */

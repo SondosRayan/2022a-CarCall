@@ -75,7 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   initializeControllers();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NavigationBar()),
+                    MaterialPageRoute(builder: (context) => const MyNavigationBar()),
                   );
                 }
 

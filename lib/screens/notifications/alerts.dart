@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../dataBase.dart';
 import '../../globals.dart';
+import '../chat_room.dart';
 import '../navigation_bar.dart';
 
 Set<String> UnreadNotifications = Set<String>();
@@ -30,14 +31,14 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
 
     return Scaffold(
       backgroundColor: blue1,
-          appBar: AppBar(
-            backgroundColor: green11,
-            automaticallyImplyLeading: false,
+      appBar: AppBar(
+        backgroundColor: green11,
+        automaticallyImplyLeading: false,
 
-            title: const Text('Notifications'),
-            centerTitle: true,
+        title: const Text('Notifications'),
+        centerTitle: true,
 
-          ),
+      ),
       body: DefaultTabController(
         length: 2,
         child: Column(
@@ -89,45 +90,45 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                                 color : (doc.get('read') == true? Colors.white : blue2),
                                 shape: RoundedRectangleBorder(
                                     borderRadius:BorderRadius.all(Radius.circular(10.0))),
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                          trailing: IconButton(icon: Icon(Icons.block), color: green11,
-                                            onPressed: (){
-                                              _showBlockDialog(doc.get('sender'), context);
-                                            },
-                                          ),
-                                          title:
-                                          RichText(
-                                            text: TextSpan(
-                                                children: [
-                                                  TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                        trailing: IconButton(icon: Icon(Icons.block), color: green11,
+                                          onPressed: (){
+                                            _showBlockDialog(doc.get('sender'), context);
+                                          },
+                                        ),
+                                        title:
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Hi ${auth.firstName}, ${doc.get('sender_name')}"
                                                     +" sent you an alert about ", style: TextStyle(color: green11),),
-                                                  TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
-                                                  TextSpan(text: ".", style: TextStyle(color: green11),),
-                                                  TextSpan(text: (doc.get('type') == 'Car Crash')?
-                                                      "You can contact ${doc.get('sender_name')} on this phone number "
-                                                      +doc.get('phoneNumber')+"."
-                                                      : null, style: TextStyle(color: green11) ),
-                                                ]
-                                            ),
-                                          )
-                                      ),
-                                      Column(
-                                        children: [
-                                          Column(
-                                            children: [
-                                              Container(
-                                                alignment: Alignment.bottomRight,
-                                                child: getText( stringTimeAgo+ "   ",Colors.blueGrey, 11, false),
-                                              ),
-                                            ],
+                                                TextSpan(text: doc.get('type'), style: TextStyle(color: green11, fontWeight: FontWeight.bold),),
+                                                TextSpan(text: ".", style: TextStyle(color: green11),),
+                                                TextSpan(text: (doc.get('type') == 'Car Crash')?
+                                                "You can contact ${doc.get('sender_name')} on this phone number "
+                                                    +doc.get('phoneNumber')+"."
+                                                    : null, style: TextStyle(color: green11) ),
+                                              ]
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                        )
+                                    ),
+                                    Column(
+                                      children: [
+                                        Column(
+                                          children: [
+                                            Container(
+                                              alignment: Alignment.bottomRight,
+                                              child: getText( stringTimeAgo+ "   ",Colors.blueGrey, 11, false),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
+                              ),
                             );
                           }).toList(),
 
@@ -167,7 +168,21 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                                 child: Column(
                                   children: [
                                     ListTile(
-                                      trailing: IconButton(icon: Icon(Icons.chat),color: green11, onPressed: () {},),
+                                        trailing: IconButton(icon: Icon(Icons.chat),color: green11,
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) =>
+                                                  ChatRoomScreen(
+                                                    userId: auth.user!.uid,
+                                                    userName: auth.fullName,
+                                                    peerId: doc.get('sender'),
+                                                    peerName: doc.get('sender_name'),
+                                                    peerAvatar: "",) //TODO
+                                              ),
+                                            );
+                                          },
+                                        ),
                                         title:
                                         RichText(
                                           text: TextSpan(
@@ -277,3 +292,4 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
 
 
 }
+

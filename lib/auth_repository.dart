@@ -213,7 +213,8 @@ class AuthRepository with ChangeNotifier {
     try {
       final snapShot = await _firebaseFirestore.collection('Users').doc(
           _user!.uid).get();
-      if (snapShot == null || !snapShot.exists) {
+      bool old_user = await oldVersionUser();
+      if ((snapShot == null || !snapShot.exists) && !old_user) {
         return true;
       } else {
         await updateLocalUserFields();
@@ -382,6 +383,37 @@ class AuthRepository with ChangeNotifier {
       }
     });
     return unblocked;
+  }
+
+  Future<bool> oldVersionUser() async {
+    FirebaseFirestore old_database = FirebaseFirestore.instance;
+    final snapShot = await old_database.collection('Users').doc(
+        _user!.uid).get();
+    if (snapShot == null || !snapShot.exists) {
+      return false;
+    }
+    print("******************* OLD USERRRRRRRRRR ****************************");
+    await updateLocalUserFieldsFromOldVersion();
+    //await old_database.collection('Users').doc(_user!.uid).delete();
+    await updateFirebaseUserList();
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> updateLocalUserFieldsFromOldVersion() async {
+    if (_user == null) return;
+    var snapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_user!.uid).get();
+    var list = snapshot.data();
+    if (list == null) return;
+    if (list['Info'] == null) return;
+    _firstName = list['Info'][0];
+    _lastName = list['Info'][1];
+    _gender = list['Info'][2];
+    _birthDate = list['Info'][3];
+    _phoneNumber = list['Info'][4];
+    _carPlate = list['Info'][5];
   }
 
 }

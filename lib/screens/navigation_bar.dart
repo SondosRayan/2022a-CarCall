@@ -7,14 +7,14 @@ import '../globals.dart';
 import 'chat_screen.dart';
 import 'notifications/alerts.dart';
 
-class NavigationBar extends StatefulWidget {
-  const NavigationBar({Key? key}) : super(key: key);
+class MyNavigationBar extends StatefulWidget {
+  const MyNavigationBar({Key? key}) : super(key: key);
 
   @override
-  _NavigationBarState createState() => _NavigationBarState();
+  _MyNavigationBarState createState() => _MyNavigationBarState();
 }
 
-class _NavigationBarState extends State<NavigationBar> {
+class _MyNavigationBarState extends State<MyNavigationBar> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
   final List<Widget> _screens =[

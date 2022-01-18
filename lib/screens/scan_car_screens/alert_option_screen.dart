@@ -87,12 +87,13 @@ class AlertOptionScreen extends StatelessWidget {
                   var sender_uid = FirebaseAuth.instance.currentUser!.uid;
                   var reciever_uid = await firebaseUser.getOwner(carNumber);
                   bool found = (reciever_uid == "")? false: true ;
-                  if(found){
+                  bool unBlocked = await firebaseUser.isUnBlocked(reciever_uid);
+                  if(found && unBlocked){
                     myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
-                        sender_uid , reciever_uid);
+                        sender_uid , reciever_uid, "");
                     await alert_notific.SendAlert();
                   }
-                  _showDialog(context,found);
+                  _showDialog(context,found && unBlocked);
 
                   //until here
                 },
@@ -129,7 +130,7 @@ class AlertOptionScreen extends StatelessWidget {
           TextButton(
             child: Text('Ok', style: TextStyle(color: green11),),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>  const NavigationBar()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  const MyNavigationBar()));
             },
           ),
         ],

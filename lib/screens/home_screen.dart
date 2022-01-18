@@ -6,7 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import '../dataBase.dart';
 import '../globals.dart';
@@ -14,7 +13,6 @@ import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
 import 'navigation_bar.dart';
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -28,14 +26,14 @@ class _MyHomePageState extends State<MyHomePage>
   late AuthRepository firebaseUser;
   final DocumentReference<Map<String, dynamic>> db = getDB();
 
+  @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     messaging.getToken().then((token) {
       firebaseUser.addToken(token!);
     });
-
   }
 
   @override

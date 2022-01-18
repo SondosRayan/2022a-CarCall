@@ -17,7 +17,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder(future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -37,6 +36,7 @@ class App extends StatelessWidget {
 
 class MyApp extends StatelessWidget {
   // const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

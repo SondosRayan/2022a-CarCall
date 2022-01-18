@@ -179,6 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void initializeControllers(){
+    // print("I am in initialize");
     emailController.text = "";
     passwordController.text = "";
     confirmController.text = "";

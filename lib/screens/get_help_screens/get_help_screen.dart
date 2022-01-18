@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../globals.dart';
 import '../../my_notification.dart';
+import '../home_screen.dart';
 import '../navigation_bar.dart';
 
 class GetHelpScreen extends StatelessWidget {

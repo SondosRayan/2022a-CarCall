@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute<void>(
-                                  builder: (context) => MyNavigationBar(index: 0,)),
+                                  builder: (context) => NavigationBar()),
                                   (r) => false);
                         }
                       }
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute<void>(
-                              builder: (context) => MyNavigationBar(index: 0,)),
+                              builder: (context) => NavigationBar()),
                               (r) => false);
                     }
                   },

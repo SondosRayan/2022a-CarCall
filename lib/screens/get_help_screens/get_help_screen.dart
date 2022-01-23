@@ -94,10 +94,11 @@ class GetHelpScreen extends StatelessWidget {
                     Position loc=await _getCurrentLocation();
                     double lat=loc.latitude;
                     double lon=loc.longitude;
+                    print ("*******************loc= $lat,$lon");
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, "","$lat,$lon");
                     await m.BroadCastHelpRequest();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 0,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  const NavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),

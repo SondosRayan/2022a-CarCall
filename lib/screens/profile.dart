@@ -3,10 +3,9 @@ import 'package:car_call/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../auth_repository.dart';
-import 'blocked_screen.dart';
 import 'login_signup_screens/login_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -25,7 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     firebaseUser = Provider.of<AuthRepository>(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final fullName = firebaseUser.firstName + " " + firebaseUser.lastName;
+    final fullName = firebaseUser.firstName + firebaseUser.lastName;
     final email = firebaseUser.getUserEmail();
     late var email1;
     email==null ? email1=" " : email1=email;
@@ -198,22 +197,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                         children: [
                           getText('Blocked: ', green11, 25, false),
                           Spacer(),
-                          IconButton(
-                            icon : Icon(Icons.arrow_forward_ios),
+                          Icon(
+                            Icons.arrow_forward_ios,
                             color: green11,
-                            onPressed: () {
-                              Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const BlockedScreen()),
-                          );
-                            },
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-                getSizeBox(10),
+                getSizeBox(15),
                 Material(
                   color: green11,
                   borderRadius: BorderRadius.circular(20.0),
@@ -224,47 +217,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                     onPressed: _onPress,
                   ),
                 ),
-                TextButton(
-                  onPressed:() {
-                    showAboutDialog(
-                      context: context,
-                      applicationVersion: '2.0.0',
-                      applicationName: 'CarCall',
-                      children: [
-                        TextButton(
-                            onPressed: (){
-                              _launchURL('https://www.vecteezy.com/free-vector/avatar');
-                            },
-                            child: getText('Avatar Vectors by Vecteezy', Colors.blue, 18, false)),
-                        TextButton(
-                            onPressed: (){
-                              _launchURL("https://www.vecteezy.com/free-vector/human");
-                            },
-                            child: getText('Avatar Vectors by Vecteezy', Colors.blue, 18, false)),
-                      ],
-                    );
-                  },
-                  child:getText("Click to view license", green2, 18, true),
-                ),
+                getSizeBox(20),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  /*
-  <a href="https://www.vecteezy.com/free-vector/avatar">Avatar Vectors by Vecteezy</a>
-
-   */
-  _launchURL(String url) async {
-    // const url = 'https://flutter.io';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 
   Future<void> _onPress() async {
@@ -283,3 +242,57 @@ class _ProfileScreenState extends State<ProfileScreen>
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
+
+/*
+return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+                width: 100,
+                height: 50,
+                child: Material(
+                  color: blue5,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: MaterialButton(
+                    // color: Colors.blue,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: getText("sign out", Colors.black, 18, true),
+                    ),
+                    onPressed: _onPress,
+                  ),
+                )
+            ),
+            box,
+            getText("Profile Screen!\nwait for sprint 2", Colors.black, 20, true),
+            box,
+            Material(
+              color: blue5,
+              borderRadius: BorderRadius.circular(20.0),
+              child: MaterialButton(
+                // color: blue5,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: getText("More Info", Colors.black, 18, true),
+                ),
+                onPressed:(){
+                  showAboutDialog(
+                    context: context,
+                    applicationVersion: '1.0.0',
+                    applicationName: 'CarCall',
+                  /*children: [
+                    Text("blablabla"),
+                  ]*/);
+                }
+              ),
+            ),
+          ],
+        ),
+      ),
+      // bottomNavigationBar: ButtomAppBar(
+      //   currentTab: _currentTab,
+      // ),
+    );
+ */

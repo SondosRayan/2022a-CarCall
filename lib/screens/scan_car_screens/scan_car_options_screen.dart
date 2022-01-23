@@ -3,7 +3,6 @@ import 'package:car_call/screens/scan_car_screens/take_picture_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../globals.dart';
-import '../navigation_bar.dart';
 import 'insert_manually_screen.dart';
 
 class ScanCarOptionScreen extends StatefulWidget {
@@ -34,10 +33,7 @@ class _ScanCarOptionScreenState extends State<ScanCarOptionScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigator.pop(context);
-            Navigator.pushAndRemoveUntil(context,
-                MaterialPageRoute(builder: (context) =>
-                    MyNavigationBar(index: 0)), (route) => false);
+            Navigator.pop(context);
           }, //TODO: back method
           alignment: Alignment.centerRight,
         ),

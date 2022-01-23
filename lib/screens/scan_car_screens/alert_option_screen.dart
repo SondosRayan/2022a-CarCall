@@ -1,6 +1,5 @@
 import 'dart:ui';
-import 'package:car_call/chat_alert_block_auth.dart';
-import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
+import 'package:car_call/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -88,15 +87,12 @@ class AlertOptionScreen extends StatelessWidget {
                   var sender_uid = FirebaseAuth.instance.currentUser!.uid;
                   var reciever_uid = await firebaseUser.getOwner(carNumber);
                   bool found = (reciever_uid == "")? false: true ;
-                  var blockAuth = BlockAuth(context);
-                  bool unBlocked = await blockAuth.isUnBlocked(firebaseUser.user!.uid, reciever_uid);
-                  if(found && unBlocked){
+                  if(found){
                     myNotification alert_notific =  myNotification(NotificationTitle.Alert, alertOption,
-                        sender_uid , reciever_uid, "");
+                        sender_uid , reciever_uid,"");
                     await alert_notific.SendAlert();
                   }
-                  Navigator.of(context).pop(); // added
-                  _showDialog(context,found && unBlocked);
+                  _showDialog(context,found);
 
                   //until here
                 },
@@ -131,15 +127,9 @@ class AlertOptionScreen extends StatelessWidget {
         ),
         actions: <Widget>[
           TextButton(
-            child: found ? Text('Ok', style: TextStyle(color: green11),)
-                         : Text('Try again', style: TextStyle(color: green11),),
+            child: Text('Ok', style: TextStyle(color: green11),),
             onPressed: () {
-              found ? Navigator.pushAndRemoveUntil(context,
-                  MaterialPageRoute(builder: (context) =>
-                      MyNavigationBar(index: 0)), (route) => false)
-                  : Navigator.pushAndRemoveUntil(context,
-                  MaterialPageRoute(builder: (context) =>
-                      ScanCarOptionScreen()), (route) => false);
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  const NavigationBar()));
             },
           ),
         ],

@@ -1,8 +1,9 @@
+import 'dart:collection';
+
 import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -13,6 +14,7 @@ import '../globals.dart';
 import '../my_notification.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
+import 'google_map_screen.dart';
 import 'navigation_bar.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -26,26 +28,28 @@ class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin{
   late AuthRepository firebaseUser;
   final DocumentReference<Map<String, dynamic>> db = getDB();
-  double current_lat=0;
-  double current_lon=0;
-  String defaultLocation="52.2165157, 6.9437819";
-  double my_radius=20;
-  TextEditingController radius_controller =TextEditingController();
+    double current_lat=0;
+    double current_lon=0;
+    String defaultLocation="52.2165157, 6.9437819";
+    double my_radius=20;
+    TextEditingController radius_controller =TextEditingController();
 
   double getDistance(String location){
-    double lat=double.parse(location.split(",")[0]);
-    double lon=double.parse(location.split(",")[1]);
-    double distance =  Geolocator.distanceBetween(current_lat, current_lon, lat, lon)/1000;
-    distance = double.parse((distance).toStringAsFixed(1));
-    return distance;
-  }
-  bool isFar(String location) {
-    double distance =  getDistance(location);
-    if(distance.abs() > my_radius) {
-      return true;
+      double lat=double.parse(location.split(",")[0]);
+      double lon=double.parse(location.split(",")[1]);
+      double distance =  Geolocator.distanceBetween(current_lat, current_lon, lat, lon)/1000;
+      distance = double.parse((distance).toStringAsFixed(1));
+     // print ("distance = $distance");
+      return distance;
     }
-    return false;
-  }
+  bool isFar(String location) {
+      double distance =  getDistance(location);
+      //print ("distance in isFar= $distance");
+      if(distance.abs() > my_radius) {
+        return true;
+      }
+      return false;
+    }
   Future<Position>_getCurrentLocation() async {
 
     bool serviceEnabled;
@@ -88,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       current_lat = loc.latitude;
       current_lon = loc.longitude;
+      //print("*****location is:$current_lat,$current_lon");
 
     });
   }
@@ -97,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage>
       content: SingleChildScrollView(
         child: ListBody( children: <Widget>[
           TextFormField(
-              keyboardType: TextInputType.number,
+            keyboardType: TextInputType.number,
               controller: radius_controller,
               decoration: const InputDecoration(
                 icon: Icon(Icons.edit),
@@ -134,10 +139,6 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    messaging.getToken().then((token) {
-      firebaseUser.addToken(token!);
-    });
     setLocation();
     setState(() {
       radius_controller.text="$my_radius";
@@ -260,9 +261,9 @@ class _MyHomePageState extends State<MyHomePage>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                    Container(alignment:Alignment.centerRight,child:IconButton(icon:Icon(Icons.settings,color: green11,), onPressed: () { showDialog(context: context,  builder:(BuildContext context) {return selectRadius(); });},))
+                  Container(alignment:Alignment.centerRight,child:IconButton(icon:Icon(Icons.settings,color: green11,), onPressed: () { showDialog(context: context,  builder:(BuildContext context) {return selectRadius(); });},))
                   ]
-                  )
+              )
 
                   ],
                 ),
@@ -286,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage>
                             children: snapshot.data!.docs.map((doc){
                               late String location;
                               try{
-                                location=doc.get('location');
+                               location=doc.get('location');
                               }
                               catch(e) {
                                 location=defaultLocation;
@@ -311,35 +312,36 @@ class _MyHomePageState extends State<MyHomePage>
                                         Container(
                                           height: 30,
                                           child: Center(child:Row(mainAxisAlignment:MainAxisAlignment.center,
-                                              children: [
-                                                // View location button
-                                                Material(
-                                                    borderRadius: BorderRadius.circular(20.0), color: blue6,
-                                                    child: MaterialButton(
-                                                      onPressed: () {
-                                                        //TODO LOCATION ON MAP*********
-                                                      },
-                                                      child:Row(children:[Icon(Icons.location_on), Text('View Location',
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),),
-                                                      ]),
-                                                    )),
-                                                SizedBox(width: 20,),
-                                                // i can help button
-                                                Material(
-                                                  borderRadius: BorderRadius.circular(20.0),
-                                                  color: blue6,
-                                                  child:TextButton(child: Text('I can help',
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                    ),),
-                                                    onPressed: () {
-                                                      _onOfferHelp(doc.get('type'), context, doc.get('sender'));
-                                                    },
-                                                  ),
-                                                ),
-                                              ]
+                                            children: [
+                                              // View location button
+                                              Material(
+                                                borderRadius: BorderRadius.circular(20.0), color: blue6,
+                                                child: MaterialButton(
+                                                onPressed: (){
+                                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                                      MyMapView(location,current_lat,current_lon)));
+                                                                                                  },
+                                                child:Row(children:[Icon(Icons.location_on), Text('View Location',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                  ),),
+                                                ]),
+                                              )),
+                                              SizedBox(width: 20,),
+                                              // i can help button
+                                           Material(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                            color: blue6,
+                                            child:TextButton(child: Text('I can help',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                ),),
+                                                onPressed: () {
+                                                  _onOfferHelp(doc.get('type'), context, doc.get('sender'));
+                                                },
+                                              ),
+                                            ),
+                                          ]
                                           )),
                                         ),
                                         Container(
@@ -395,7 +397,7 @@ class _MyHomePageState extends State<MyHomePage>
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, to,"");
                     await m.SendHelpOffer();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 0,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  NavigationBar()));
                     // to show another dialog for the GPS
                   },
                 ),

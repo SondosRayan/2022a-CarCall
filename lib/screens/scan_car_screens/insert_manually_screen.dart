@@ -17,18 +17,15 @@ class InsertManuallyScreen extends StatefulWidget {
 class _InsertManuallyScreenState extends State<InsertManuallyScreen > {
 
   late AuthRepository firebaseUser;
-  TextEditingController license_plate = TextEditingController();
+  TextEditingController license_plate = TextEditingController(text: "");
   bool _validCar = false;
-
-  @override
-  void dispose() {
-    license_plate.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     firebaseUser=Provider.of<AuthRepository>(context);
+    setState(() {
+      license_plate.text.isEmpty ? _validCar = true : _validCar = false;
+    });
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -65,30 +62,41 @@ class _InsertManuallyScreenState extends State<InsertManuallyScreen > {
                         : null,
                   ),
                 ),
+                // TextField(
+                //     decoration: InputDecoration(
+                //       errorText: _validCar ?"Enter car number" : null,
+                //       border: const UnderlineInputBorder(),
+                //     ),
+                //     controller: _license_plate,
+                //     cursorColor: green11,
+                //     style: TextStyle(color: green11)),
                 box,
-                makeBox('Continue', 350, 60, blue3, green11, 25,
-                    (){
-                      setState(() {
-                        license_plate.text.isEmpty ? _validCar = true : _validCar = false;
-                      });
-                      if (license_plate.text.isNotEmpty) {
-                        // firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
-                        Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                            AlertOptionScreen(carNumber: license_plate.text)));
-                      }
-                    }
-                ),
+                makeBox('Continue', 350, 60, blue3, green11, 25, getContinueTapFunction(context)),
+
                 Flexible(child:
                 Image.asset(
                   'assets/images/car_plate.png',
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
                 ),),
+
               ],
             ),
           ),
         )
     );
     //throw UnimplementedError();
+  }
+  getContinueTapFunction(context) {
+    setState(() {
+      license_plate.text.isEmpty ? _validCar = true : _validCar = false;
+    });
+    if (license_plate.text.isNotEmpty) {
+      // firebaseUser.getUIDbyCarNumber(_license_plate.value.text);
+      return () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+            AlertOptionScreen(carNumber: license_plate.text)));
+      };
+    }
   }
 }

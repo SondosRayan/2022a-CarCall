@@ -75,7 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   initializeControllers();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => MyNavigationBar(index: 0,)),
+                    MaterialPageRoute(builder: (context) => const NavigationBar()),
                   );
                 }
 
@@ -179,7 +179,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void initializeControllers(){
-    // print("I am in initialize");
     emailController.text = "";
     passwordController.text = "";
     confirmController.text = "";
@@ -200,7 +199,7 @@ class GenderRadio extends StatefulWidget {
 }
 
 class _GenderRadioState extends State<GenderRadio> {
-  String gender="";
+  String gender="Female";
 
   @override
   Widget build(BuildContext context) {

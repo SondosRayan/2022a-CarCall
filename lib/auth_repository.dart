@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -229,6 +230,9 @@ class AuthRepository with ChangeNotifier {
   // END OF SIGN IN FUNCTIONS
   /////////////////////////////////////////////////////////////////////////////
   Future signOut() async {
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      await this.removeToken(token!);
+    });
     _auth.signOut();
     _status = Status.Unauthenticated;
     notifyListeners();
@@ -414,6 +418,17 @@ class AuthRepository with ChangeNotifier {
     _birthDate = list['Info'][3];
     _phoneNumber = list['Info'][4];
     _carPlate = list['Info'][5];
+  }
+
+  Future<void> removeToken(String token) async {
+
+    if(token == null) {
+      print('!!!!! Token Is Null !!!!!');
+      return;
+    }
+    await _firebaseFirestore.collection('Tokens').doc(token).delete();
+    await _firebaseFirestore.collection('Users').doc(user!.uid).collection('tokens').doc(token).delete();
+    print("Token Removed Successfully!\n token : $token");
   }
 
 }

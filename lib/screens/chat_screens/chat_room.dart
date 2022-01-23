@@ -2,8 +2,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../dataBase.dart';
-import '../globals.dart';
+import '../../chat_alert_block_auth.dart';
+import '../../dataBase.dart';
+import '../../globals.dart';
 import 'package:intl/intl.dart';
 // import 'package:http/http.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
@@ -40,14 +41,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   _ChatRoomScreenState({Key? key, required this.userId, required this.userName,
     required this.peerId, required this.peerName, required this.peerAvatar});
 
+  final db = getDB();
+
   String userId;
   String userName;
   String peerId;
   String peerName;
   String peerAvatar;
-
   String chatRoomId = "";
-
   List<QueryDocumentSnapshot> listMessage = [];
   int _limit = 15; //?????
   bool isLoading = false;
@@ -90,6 +91,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           backgroundColor: green11,
+          toolbarHeight: screenWidth(context)*0.18,
           flexibleSpace: SafeArea(
             child: Container(
               padding: EdgeInsets.only(right: 16),
@@ -116,15 +118,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       ],
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.block,color: appAppBarTextColor,),
-                      FittedBox(
-                        fit: BoxFit.fill,
-                        child: getText("block", appAppBarTextColor, 15, false),
-                      ),
-                    ],
+                  InkWell(
+                    onTap: onBlockUser,
+                    customBorder: CircleBorder(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.block,color: appAppBarTextColor,),
+                        FittedBox(
+                          fit: BoxFit.fill,
+                          child: getText("block", appAppBarTextColor, 15, false),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -148,7 +154,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Widget buildListMessage() {
-    final db = getDB();
     return Container(
       color: backgroundColor,
       child: chatRoomId == ''
@@ -169,7 +174,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             return ListView.builder(
               padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.023 * 6/5),
               itemBuilder: (context, index) =>
-                  buildItem(index, snapshot.data!.docs[index]),
+                  buildMessage(index, snapshot.data!.docs[index]),
               itemCount: snapshot.data!.docs.length,
               reverse: true,
               controller: listScrollController,
@@ -193,22 +198,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           children: <Widget>[
             SizedBox(width: 15,),
             Expanded(
-              child: TextField(
-                controller: textEditingController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                    hintText: "Write message...",
-                    hintStyle: TextStyle(color: Colors.white),
-                    labelStyle: TextStyle(color: Colors.white),
-                    /*focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 2.0,
-                      ),
-                    ),*/
-                    border: InputBorder.none
+              child: Container(
+                child: TextField(
+                  controller: textEditingController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                      hintText: "Write message...",
+                      hintStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: Colors.white),
+                      /*focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 2.0,
+                        ),
+                      ),*/
+                      border: InputBorder.none
 
+                  ),
                 ),
               ),
             ),
@@ -232,65 +239,47 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   Future<void> sendMessage(String message) async {
     ///Check if message is empty or not
-    print("the message is $message");
+    // print("the message is $message");
     if (message.trim() != '') {
-      textEditingController.clear();
       ///Add myself to peer's list of contacts in the first spot of the list
-      final db = getDB();
-      ///??????????????????????????
-      ///delete the document of peer in the current user data
-      // var collection = db.collection('Users').doc(userId).collection('Messages');
-      // var snapshot = await collection.where('peerId', isEqualTo: peerId).get();
-      // await snapshot.docs.first.reference.delete();
-      /*db.collection('Users').doc(userId).collection('Messages')
-          .doc(DateTime.now().millisecondsSinceEpoch.toString()).set(
-          {
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-            'lastMessage': message,
-            'peerId': peerId,
-            'sentByMe': 'Yes',
-            'isRead': 'Yes',
-          }
-      );*/
-      var map=await db.collection('messageAlert').doc(peerId).get();
-      late List oldMap;
-      try {
-        oldMap = map['users'];
-        oldMap.removeWhere((element) => element['id']==userId);
-      }catch(e){
-        print(e);
-        oldMap = [];
+      var blockAuth = BlockAuth(context);
+      // check if I blocked this peer
+      bool isBlockedPeer = !(await blockAuth.isUnBlocked(userId, peerId));
+      if (isBlockedPeer == true) {
+        //I can't send message until I unlock him
+        blockAuth.showUnBlockMessagesDialog(peerId);
+        return;
       }
-      // print("hello3");
-      List newMap=[{'id':userId,'name':userName}];
-      newMap.addAll(oldMap);
-      db.collection('messageAlert').doc(peerId).set({'users':newMap});
+      // check if I am sending a message to peer who blocked me
+      bool isBlockedUser = !(await blockAuth.isUnBlocked(peerId, userId));
+      if (isBlockedUser) {
+        Fluttertoast.showToast(
+            msg: "You can't send message to this user.",
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            toastLength: Toast.LENGTH_LONG);
+        return;
+      }
+      textEditingController.clear();
+      String time = DateTime.now().millisecondsSinceEpoch.toString();
+
+      ///Add myself to peer's list of contacts in the first spot of the list
+      updateMessageAlert(message, time, peerId, userId, userName);
+
       ///Add peer to my list of contacts in the first spot of the list
-      // var peerDoc=db.collection('Users').doc(peerId).get();
-      map=await db.collection('messageAlert').doc(userId).get();
-      try {
-        oldMap = map['users'];
-        oldMap.removeWhere((element) => element['id'] == peerId);
-      }catch(e){
-        print(e);
-        oldMap = [];
-      }
-      newMap=[{'id':peerId,'name':peerName,'lastMessage': message}];
-      newMap.addAll(oldMap);
-      db.collection('messageAlert').doc(userId).set({'users':newMap});
-      ///??????????????????????????
+      updateMessageAlert(message, time, userId, peerId, peerName);
+
       ///Make a message document in firebase
       db.collection('messages').doc(chatRoomId).collection(chatRoomId)
-          .doc(DateTime.now().millisecondsSinceEpoch.toString()).set(
+          .doc(time).set(
           {
             'idFrom': userId,
             'senderName': userName,
             'idTo': peerId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+            'timestamp': time,
             'content': message,
           }
       );
-      ///?????????????????????????
     }
     else {
       Fluttertoast.showToast(
@@ -301,7 +290,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     }
   }
 
-  Widget buildItem(int index, DocumentSnapshot doc) {
+  Widget buildMessage(int index, DocumentSnapshot doc) {
     final id = doc.get('idFrom');
     if (id == userId) {
       // Right (my message)
@@ -310,18 +299,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.fromLTRB(
-              MediaQuery.of(context).size.width * 0.023 * 6/10*3,
-              MediaQuery.of(context).size.width * 0.023 * 6/10,
-              MediaQuery.of(context).size.width * 0.023 * 6/10*3,
-              MediaQuery.of(context).size.width * 0.023 * 6/5,
+              screenWidth(context) * 0.023 * 6/10*3,
+              screenWidth(context) * 0.023 * 6/10,
+              screenWidth(context) * 0.023 * 6/10*3,
+              screenWidth(context) * 0.023 * 6/5,
             ),
-            width: MediaQuery.of(context).size.width * 0.023 * 6 *4,
+            width: screenWidth(context) * 0.023 * 6 *4,
             decoration: BoxDecoration(
                 color: myTextBackgroundColor,
                 borderRadius: BorderRadius.circular(20.0)),
             margin: EdgeInsets.only(
-              bottom: MediaQuery.of(context).size.width * 0.023 * 6/5,
-              right: MediaQuery.of(context).size.width * 0.023 * 6/5,
+              bottom: screenWidth(context) * 0.023 * 6/5,
+              right: screenWidth(context) * 0.023 * 6/5,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -375,5 +364,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         ),
       );
     }
+  }
+
+  void onBlockUser(){
+    // if I locked someone I don't want to recieve from him any message & alert
+    // I want to block this user so I don't receive any message from him
+    // & I can't send to him messages until I unblock him
+
+    // first add this person to my blocked people
+    var blockAuth = BlockAuth(context);
+    blockAuth.showBlockDialog(peerId,'annoying messages');
+
+    // second
+  }
+
+  // other- the user that i add for him the last message with me
+  Future<void> updateMessageAlert(String message, String time, String other,
+      String me, String meName) async {
+    ///delete the document of peer in the current user data
+    var map=await db.collection('messageAlert').doc(other).get();
+    late List oldMap;
+    try {
+      oldMap = map['users'];
+      oldMap.removeWhere((element) => element['id']==me);
+    }catch(e){
+      print(e);
+      oldMap = [];
+    }
+    List newMap=[{
+      'id': me,
+      'name': meName,
+      'lastMessage': message,
+      'timestamp': time,
+      'seen': false,
+    }];
+    newMap.addAll(oldMap);
+    db.collection('messageAlert').doc(other).set({'users':newMap});
   }
 }

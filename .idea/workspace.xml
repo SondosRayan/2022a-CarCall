@@ -50,8 +50,8 @@
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
     <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../2021b-MatSpot-main" />
-    <property name="project.structure.last.edited" value="SDKs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Problems" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="dart.settings" />
@@ -59,6 +59,8 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Sondos\Desktop\University\semester 9\236271\working sprint 2\v5\lib" />
+      <recent name="C:\Users\Sondos\Desktop\University\semester 9\236271\working sprint 2\v5\lib\screens\chat_screens" />
       <recent name="C:\Users\Sondos\Desktop\v5\android\app" />
       <recent name="C:\Users\Sondos\Desktop\v5\assets\icons" />
     </key>

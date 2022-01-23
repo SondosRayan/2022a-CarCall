@@ -1,12 +1,12 @@
-
 import 'package:car_call/auth_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../chat_alert_block_auth.dart';
 import '../../dataBase.dart';
 import '../../globals.dart';
-import '../chat_room.dart';
+import '../chat_screens/chat_room.dart';
 import '../navigation_bar.dart';
 
 Set<String> UnreadNotifications = Set<String>();
@@ -23,8 +23,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
   late AuthRepository auth ;
   final db = getDB();
 
-
-
   @override
   Widget build(BuildContext context){
     auth = Provider.of<AuthRepository>(context);
@@ -35,7 +33,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
         backgroundColor: green11,
         automaticallyImplyLeading: false,
 
-        title: const Text('Notifications'),
+        title: getText('Notifications', Colors.white, 30, true),
         centerTitle: true,
 
       ),
@@ -51,8 +49,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                 child: TabBar(
                   indicatorColor: Colors.white,
                   tabs: [
-                    Tab(icon: Text("Alerts")),
-                    Tab(icon: Text("Help Offers")),
+                    Tab(icon: getText("Alerts",Colors.white,18,false)),
+                    Tab(icon: getText("Help Offers",Colors.white,18,false)),
                   ],
                 ),
               ),
@@ -78,7 +76,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                             if(doc.get('read') == false){
                               UnreadNotifications.add('A'+doc.id);
                             }
-
                             return GestureDetector(
                               onTap: () => {
                                 setState(() {
@@ -95,7 +92,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                                     ListTile(
                                         trailing: IconButton(icon: Icon(Icons.block), color: green11,
                                           onPressed: (){
-                                            _showBlockDialog(doc.get('sender'), context);
+                                            var blockAuth = BlockAuth(context);
+                                            blockAuth.showBlockDialog(doc.get('sender'),'annoying alerts');
                                           },
                                         ),
                                         title:
@@ -214,82 +212,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
         ),
       ),        );
   }
-
-  Future<void> _showBlockDialog(String to_Block, context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody( children: <Widget>[
-              Text('Are you sure you want to block this user?')
-            ],
-            ),
-          ),
-          actions: <Widget>[Row(
-            children: [
-              TextButton(
-                child: Text('Yes', style: TextStyle(color: green11,),),
-                onPressed: () async{
-                  auth.blockUser(to_Block, 'annoying alerts');
-                  Navigator.of(context).pop();
-                },
-              ),
-              const Spacer(),
-              TextButton(
-                child: Text('No', style: TextStyle(color: green11),),
-                onPressed: () {Navigator.of(context).pop();},
-              ),
-            ],
-          ),
-          ],
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-        );
-      },
-    );
-  }
-
-  String getDifference(Duration diff){
-    int DaysAgo = diff.inDays;
-    int HoursAgo = diff.inHours;
-    int MinutesAgo = diff.inMinutes;
-    int secondsAgo = diff.inSeconds;
-    String stringTimeAgo = "";
-    if(DaysAgo > 0){
-      if(HoursAgo == 1){
-        stringTimeAgo = DaysAgo.toString()+" Day Ago";
-      }else{
-        stringTimeAgo = DaysAgo.toString()+" Days Ago";
-      }
-    }
-    else if(HoursAgo > 0){
-      if(HoursAgo == 1){
-        stringTimeAgo = HoursAgo.toString()+" Hour Ago";
-      }else{
-        stringTimeAgo = HoursAgo.toString()+" Hours Ago";
-      }
-    }
-    else if(MinutesAgo >0){
-      if(HoursAgo == 1){
-        stringTimeAgo = MinutesAgo.toString()+" Minute Ago";
-      }else{
-        stringTimeAgo = MinutesAgo.toString()+" Minutes Ago";
-      }
-    }
-    else if(secondsAgo >=3){
-      stringTimeAgo = secondsAgo.toString()+" Seconds Ago";
-    }
-    else{
-      stringTimeAgo = "just now";
-    }
-    return stringTimeAgo;
-  }
-
-
-
-
 
 }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,7 +9,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'dataBase.dart';
 
-
 enum Status { Authenticated, Unauthenticated, Authenticating, Authenticating2 }
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
@@ -16,8 +16,6 @@ const String femaleDefaultAvatar =
     'https://static.vecteezy.com/system/resources/thumbnails/001/993/889/small/beautiful-latin-woman-avatar-character-icon-free-vector.jpg';
 const String maleDefaultAvatar =
     "https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg";
-
-
 
 
 class my_message{
@@ -229,6 +227,9 @@ class AuthRepository with ChangeNotifier {
   // END OF SIGN IN FUNCTIONS
   /////////////////////////////////////////////////////////////////////////////
   Future signOut() async {
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      await this.removeToken(token!);
+    });
     _auth.signOut();
     _status = Status.Unauthenticated;
     notifyListeners();
@@ -414,6 +415,33 @@ class AuthRepository with ChangeNotifier {
     _birthDate = list['Info'][3];
     _phoneNumber = list['Info'][4];
     _carPlate = list['Info'][5];
+  }
+
+  Future<void> removeToken(String token) async {
+
+    if(token == null) {
+      print('!!!!! Token Is Null !!!!!');
+      return;
+    }
+    await _firebaseFirestore.collection('Tokens').doc(token).delete();
+    await _firebaseFirestore.collection('Users').doc(user!.uid).collection('tokens').doc(token).delete();
+    print("Token Removed Successfully!\n token : $token");
+  }
+
+  void updateProfile(String firstName, String lastName,
+      String phoneNumber, String carPlate) async {
+    String oldCarPlate = _carPlate;
+    try {
+      _firstName = firstName;
+      _lastName = lastName;
+      _phoneNumber = phoneNumber;
+      _carPlate = carPlate;
+      await _firebaseFirestore.collection('Cars').doc(oldCarPlate).delete();
+      await updateFirebaseUserList();
+      notifyListeners(); // ????
+    } catch (e) {
+      print(e);
+    }
   }
 
 }

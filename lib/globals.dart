@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+screenWidth(context) => MediaQuery.of(context).size.width;
 // delete
-s50(context) => MediaQuery.of(context).size.width * 0.023 * 6;
+s50(context) => screenWidth(context) * 0.020 * 6;
 s25(context) => s50(context) / 2;
 s10(context) => s50(context) / 5;
 s5(context) => s10(context) / 2;
@@ -133,6 +134,43 @@ SizedBox makeBoxWithPic(String imagePath, double imageHeight, double imageWidth,
     ),
   );
 }
+
+String getDifference(Duration diff){
+  int DaysAgo = diff.inDays;
+  int HoursAgo = diff.inHours;
+  int MinutesAgo = diff.inMinutes;
+  int secondsAgo = diff.inSeconds;
+  String stringTimeAgo = "";
+  if(DaysAgo > 0){
+    if(HoursAgo == 1){
+      stringTimeAgo = DaysAgo.toString()+" Day Ago";
+    }else{
+      stringTimeAgo = DaysAgo.toString()+" Days Ago";
+    }
+  }
+  else if(HoursAgo > 0){
+    if(HoursAgo == 1){
+      stringTimeAgo = HoursAgo.toString()+" Hour Ago";
+    }else{
+      stringTimeAgo = HoursAgo.toString()+" Hours Ago";
+    }
+  }
+  else if(MinutesAgo >0){
+    if(HoursAgo == 1){
+      stringTimeAgo = MinutesAgo.toString()+" Minute Ago";
+    }else{
+      stringTimeAgo = MinutesAgo.toString()+" Minutes Ago";
+    }
+  }
+  else if(secondsAgo >=3){
+    stringTimeAgo = secondsAgo.toString()+" Seconds Ago";
+  }
+  else{
+    stringTimeAgo = "just now";
+  }
+  return stringTimeAgo;
+}
+
 
 
 

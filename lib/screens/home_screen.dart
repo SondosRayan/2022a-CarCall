@@ -1,4 +1,3 @@
-import 'package:car_call/screens/LocalNotificationService.dart';
 import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,36 +15,6 @@ import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
 import 'navigation_bar.dart';
 
-class MySingleton {
-  static final MySingleton _singleton = MySingleton._internal();
-  factory MySingleton() => _singleton;
-
-  MySingleton._internal() {
-    FirebaseMessaging.instance.getInitialMessage().then((event) {
-      print("************************** getInitialMessage");
-      if (event != null) {
-
-      }
-    });
-
-    // Foregrand State
-    FirebaseMessaging.onMessage.listen((event) {
-      print("************************** onMessage");
-      LocalNotificationService.showNotificationOnForeground(event);
-
-    });
-
-    // background State
-    FirebaseMessaging.onMessageOpenedApp.listen((event) {
-      print("************************** onMessageOpenedApp");
-
-    });
-
-  }
-
-// Methods, variables ...
-}
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -55,7 +24,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin{
-
   late AuthRepository firebaseUser;
   final DocumentReference<Map<String, dynamic>> db = getDB();
   double current_lat=0;
@@ -63,10 +31,6 @@ class _MyHomePageState extends State<MyHomePage>
   String defaultLocation="52.2165157, 6.9437819";
   double my_radius=20;
   TextEditingController radius_controller =TextEditingController();
-
-  late String notificationMsg;
-  bool _isConfigured = false;
-
 
   double getDistance(String location){
     double lat=double.parse(location.split(",")[0]);
@@ -167,21 +131,17 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-
-
   @override
-  void initState(){
+  void initState() {
     super.initState();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    messaging.getToken().then((token){
+    messaging.getToken().then((token) {
       firebaseUser.addToken(token!);
     });
     setLocation();
     setState(() {
       radius_controller.text="$my_radius";
     });
-    LocalNotificationService.initilize();
-    MySingleton();
   }
   @override
   Widget build(BuildContext context) {
@@ -435,7 +395,7 @@ class _MyHomePageState extends State<MyHomePage>
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, to,"");
                     await m.SendHelpOffer();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 0,)));
                     // to show another dialog for the GPS
                   },
                 ),

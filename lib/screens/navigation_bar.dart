@@ -4,18 +4,27 @@ import 'package:car_call/screens/requests_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../globals.dart';
-import 'chat_screen.dart';
+import 'chat_screens/chat_screen.dart';
 import 'notifications/alerts.dart';
 
 class MyNavigationBar extends StatefulWidget {
-  const MyNavigationBar({Key? key}) : super(key: key);
+  int index;
+  MyNavigationBar({Key? key, required this.index}) : super(key: key);
 
   @override
-  _MyNavigationBarState createState() => _MyNavigationBarState();
+  _MyNavigationBarState createState() => _MyNavigationBarState(index: index);
 }
 
 class _MyNavigationBarState extends State<MyNavigationBar> {
-  int _selectedIndex = 0;
+  _MyNavigationBarState({Key? key, required this.index});
+  int index;
+  late int _selectedIndex;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIndex = index;
+  }
   final PageController _pageController = PageController();
   final List<Widget> _screens =[
     const MyHomePage(), ChatScreen(), const RequestsScreen(),

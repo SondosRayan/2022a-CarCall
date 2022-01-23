@@ -1,10 +1,10 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auth_repository.dart';
+import '../chat_alert_block_auth.dart';
 import '../dataBase.dart';
 import '../globals.dart';
 
@@ -47,7 +47,8 @@ class _BlockedScreenState extends State<BlockedScreen> {
                   child: ListTile(
                       trailing: TextButton(child: Text('unblock', style: TextStyle(color: green11),),
                         onPressed: (){
-                          _showUnBlockDialog(doc.id, context);
+                          var blockAuth = BlockAuth(context);
+                          blockAuth.showUnBlockDialog(doc.id);
                         },
                       ),
                       title:Text(doc.get('name'), style: TextStyle(color:green11)),
@@ -57,41 +58,6 @@ class _BlockedScreenState extends State<BlockedScreen> {
             );}
           },
       ),
-    );
-  }
-  Future<void> _showUnBlockDialog(String to_unBlock, context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody( children: <Widget>[
-              Text('Are you sure you want to unblock this user?')
-            ],
-            ),
-          ),
-          actions: <Widget>[Row(
-            children: [
-              TextButton(
-                child: Text('Yes', style: TextStyle(color: green11,),),
-                onPressed: () async{
-                  auth.unBlockUser(to_unBlock);
-                  Navigator.of(context).pop();
-                },
-              ),
-              const Spacer(),
-              TextButton(
-                child: Text('No', style: TextStyle(color: green11),),
-                onPressed: () {Navigator.of(context).pop();},
-              ),
-            ],
-          ),
-          ],
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-        );
-      },
     );
   }
 }

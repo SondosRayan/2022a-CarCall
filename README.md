@@ -1,4 +1,4 @@
-# CallCar
+# CarCall
 
 <a href='https://play.google.com/store/apps/details?id=com.technion.car_call&gl=IL'><img alt='Get it on Google Play' src="docs/googleplaybadge.png" width="250" height="100"/></a>
 

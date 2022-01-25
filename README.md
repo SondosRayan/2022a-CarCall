@@ -19,7 +19,7 @@
 * [ ] enabling chat with people who offer help, with the option of disabling it in case of harassment.
 * [ ] Blocking annoying or disrespectful users.
 
-Contents provided in docs folder:
+## Table of contents
 1. [Database](docs/database.md)
 2. [Setup](docs/setup.md)
 

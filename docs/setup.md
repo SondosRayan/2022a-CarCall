@@ -1,9 +1,9 @@
-# \<Setup>
 
-## Setup Guide:
+# Setup Guide:
 
 To setup this project:
 
+* [ ] Setup flutter packages, an editor, and an emulator.
 * [ ] Download the project.
 * [ ] Open it with an editor, like android studio.
 * [ ] Run Pub Get.

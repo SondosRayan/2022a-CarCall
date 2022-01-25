@@ -19,6 +19,10 @@
 * [ ] enabling chat with people who offer help, with the option of disabling it in case of harassment.
 * [ ] Blocking annoying or disrespectful users.
 
+## Screenshots of the app
+
+<img src="docs/1.png" width="180"> <img src="docs/2.png" width="180"> <img src="docs/3.png" width="180"> <img src="docs/4.png" width="180"> <img src="docs/5.png" width="180"> <img src="docs/6.png" width="180">
+
 ## Table of contents
 1. [Database](docs/database.md)
 2. [Setup](docs/setup.md)

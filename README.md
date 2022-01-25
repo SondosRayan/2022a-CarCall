@@ -1,5 +1,7 @@
 # CallCar
 
+<a href='https://play.google.com/store/apps/details?id=com.technion.car_call&gl=IL'><img alt='Get it on Google Play' src="docs/googleplaybadge.png" width="250" height="100"/></a>
+
 > this is an application that serves as a platform for drivers to contact each other and ask for help. 
 
 ## Motivation
@@ -20,3 +22,7 @@
 Contents provided in docs folder:
 1. [Database](docs/database.md)
 2. [Setup](docs/setup.md)
+
+## Disclaimer
+
+Google Play and the Google Play logo are trademarks of Google LLC.

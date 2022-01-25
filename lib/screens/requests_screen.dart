@@ -42,16 +42,40 @@ class _RequestsScreenState extends State<RequestsScreen> {
       appBar: AppBar(
         backgroundColor: green11,
         automaticallyImplyLeading: false,
-        title: const Text('My Requsets'),
+        title: getText('My Requsets', Colors.white, 25, true),
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: db.collection('Users').doc(auth.user!.uid)
             .collection('Requests').orderBy('timestamp', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if(!snapshot.hasData){ // ?????
             return const Center(
               child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.data!.docs.isEmpty) {
+            return ListView(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    getSizeBox(screenHeight(context)*0.08),
+                    getText("You have no requests to show.",
+                        Colors.grey.shade600, 18, true),
+                    getText("if you need help, please create",
+                        Colors.grey.shade600, 18, true),
+                    getText("new help request down below",
+                        Colors.grey.shade600, 18, true),
+                    getSizeBox(screenHeight(context)*0.05),
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      // height: screenHeight(context)*0.75,
+                      width: screenWidth(context)*0.9,
+                      child: Image.asset('assets/images/arrow.gif'),),
+                  ],
+                ),
+              ],
             );
           } else {
             return ListView(

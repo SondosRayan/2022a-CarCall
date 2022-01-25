@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:car_call/screens/login_signup_screens/login_screen.dart';
 import 'package:car_call/screens/scan_car_screens/scan_car_options_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,9 +12,44 @@ import 'package:provider/provider.dart';
 import '../dataBase.dart';
 import '../globals.dart';
 import '../my_notification.dart';
+import 'LocalNotificationService.dart';
 import 'get_help_screens/get_help_screen.dart';
 import 'package:car_call/auth_repository.dart';
 import 'navigation_bar.dart';
+import 'google_map_screen.dart';
+
+class MySingleton {
+  static final MySingleton _singleton = MySingleton._internal();
+  factory MySingleton() => _singleton;
+
+  MySingleton._internal() {
+    FirebaseMessaging.instance.getInitialMessage().then((event) {
+      print("************************** getInitialMessage");
+      if (event != null) {
+        String GoTo = "";
+        if(event.notification!.title == "Alert" || event.notification!.title == "Help Offer"){
+          Navigator.push(navigatorKey.currentContext!,
+              MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 3)));        }
+        else{
+          Navigator.push(navigatorKey.currentContext!,
+              MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 1)));
+        }
+      }
+    });
+
+    // Foregrand State
+    FirebaseMessaging.onMessage.listen((event) {
+      print("************************** onMessage");
+      LocalNotificationService.showNotificationOnForeground(event);
+
+    });
+
+    // background State
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print("************************** onMessageOpenedApp");
+    });
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -29,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage>
   double current_lat=0;
   double current_lon=0;
   String defaultLocation="52.2165157, 6.9437819";
-  double my_radius=20;
+  //double my_radius=20;
   TextEditingController radius_controller =TextEditingController();
 
   double getDistance(String location){
@@ -142,6 +178,8 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       radius_controller.text="$my_radius";
     });
+    LocalNotificationService.initilize();
+    MySingleton();
   }
   @override
   Widget build(BuildContext context) {
@@ -253,20 +291,48 @@ class _MyHomePageState extends State<MyHomePage>
                 width:size.width,
                 padding: const EdgeInsets.only(top: 10.0),
                 child:Column(
-                  children: [Row(mainAxisAlignment:MainAxisAlignment.center,children:[  Text('People Who Need Help',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                    Container(alignment:Alignment.centerRight,child:IconButton(icon:Icon(Icons.settings,color: green11,), onPressed: () { showDialog(context: context,  builder:(BuildContext context) {return selectRadius(); });},))
+                  children: [FittedBox(fit: BoxFit.fill,child:
+                  Row(mainAxisAlignment:MainAxisAlignment.center,children:[
+                    Container(
+                      alignment:Alignment.center,
+                      padding: const EdgeInsets.only( left: 20.0,right: 20),
+                      child:Text('People Who Need Help',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),),
+
+                    Container(alignment:Alignment.centerRight,child:Row(children:[
+                      MaterialButton(
+                        minWidth:size.width*0.1,
+                        splashColor:Colors.grey,
+                        shape: CircleBorder(),
+                        child:Icon(Icons.settings,color: green11,),
+                        onPressed: () {
+                          showDialog(context: context,  builder:(BuildContext context) {return selectRadius(); });
+                        },
+                        //splashColor: Colors.grey,
+                      ),
+                      MaterialButton(
+                          minWidth:size.width*0.1,
+                          shape: CircleBorder(),
+                          splashColor:Colors.grey,
+                          child:Icon(Icons.refresh,color: green11,), onPressed: () {
+                        setLocation();}),
+                    ])
+                    )
                   ]
-                  )
+                  ))
 
                   ],
                 ),
-                decoration: BoxDecoration(color:blue3,borderRadius:BorderRadius.only(topLeft:Radius.circular(20),topRight:Radius.circular(20),bottomLeft: Radius.zero,bottomRight: Radius.zero)),
+                decoration: BoxDecoration(color:blue3,borderRadius:BorderRadius.only(
+                    topLeft:Radius.circular(20),
+                    topRight:Radius.circular(20),
+                    bottomLeft: Radius.zero,
+                    bottomRight: Radius.zero)),
               ),
               (firebaseUser.user == null) ? Container() :
               Flexible(
@@ -276,11 +342,34 @@ class _MyHomePageState extends State<MyHomePage>
                     child: StreamBuilder<QuerySnapshot>(
                       stream: db.collection('Requests').snapshots(),
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
+                        if(!snapshot.hasData){ // ?????
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
-                        } else {
+                        }
+                        if (snapshot.data!.docs.isEmpty) {
+                          return ListView(
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  getSizeBox(screenHeight(context)*0.08),
+                                  getText("No people around needs help!",
+                                      Colors.grey.shade600, 18, true),
+                                  getText("if you want try to change the radius above",
+                                      Colors.grey.shade600, 18, true),
+                                  getSizeBox(screenHeight(context)*0.05),
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 500),
+                                    // height: screenHeight(context)*0.75,
+                                    width: screenWidth(context)*0.9,
+                                    child: Image.asset('assets/images/my-requests.gif'),),
+                                ],
+                              ),
+                            ],
+                          );
+                        }
+                        else {
                           return ListView(
                             shrinkWrap: true,
                             children: snapshot.data!.docs.map((doc){
@@ -317,7 +406,10 @@ class _MyHomePageState extends State<MyHomePage>
                                                     borderRadius: BorderRadius.circular(20.0), color: blue6,
                                                     child: MaterialButton(
                                                       onPressed: () {
-                                                        //TODO LOCATION ON MAP*********
+                                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+                                                            MyMapView(location,current_lat,current_lon)));
+                                                        // Navigator.push(context, )MaterialPageRoute(builder: (context) =>
+                                                        //     MyMapView(location,current_lat,current_lon));
                                                       },
                                                       child:Row(children:[Icon(Icons.location_on), Text('View Location',
                                                         style: TextStyle(
@@ -424,7 +516,6 @@ class _MyHomePageState extends State<MyHomePage>
     );
     ScaffoldMessenger.of(context).showSnackBar(signout_snackBar);
   }
-
 
   @override
   // TODO: implement wantKeepAlive

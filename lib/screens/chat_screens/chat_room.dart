@@ -2,19 +2,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import '../../auth_repository.dart';
 import '../../chat_alert_block_auth.dart';
 import '../../dataBase.dart';
 import '../../globals.dart';
 import 'package:intl/intl.dart';
-// import 'package:http/http.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
 
-// final messages = [];
 final appBarColor = green11;
 final appAppBarTextColor = Colors.white;
 
 final myMessageColor = Colors.white;
-final myTextBackgroundColor = green11;
+final myTextBackgroundColor = const Color.fromRGBO(6,133,138,1);
 
 final peerMessageColor = green11;
 final peerTextBackgroundColor = blue3;
@@ -50,7 +49,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   String peerAvatar;
   String chatRoomId = "";
   List<QueryDocumentSnapshot> listMessage = [];
-  int _limit = 15; //?????
+  int _limit = 15;
   bool isLoading = false;
 
   final TextEditingController textEditingController = TextEditingController();
@@ -78,14 +77,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       focusNode.hasFocus? setState((){}):null;
     });
     isLoading = false;
-    // print("the id of sending message is: $userId his name is $userName");
-    // print("the id of receiving message is: $peerId his name is $peerName");
-    // print("the id of chatters is: $chattersId");
     super.initState();
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    UserLeavesroom(chatRoomId);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthRepository>(context);
+    UserEnterRoom(chatRoomId);
     return Scaffold(
       appBar: AppBar(
           elevation: 0,
@@ -99,14 +103,27 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 children: <Widget>[
                   IconButton(
                     onPressed: (){
+                      // update last message to seen
+                      db.collection('messageAlert').doc(userId).collection('Peers').doc(peerId).update({'seen':true});
                       Navigator.pop(context);
                     },
                     icon: Icon(Icons.arrow_back,color: appAppBarTextColor,),
                   ),
                   SizedBox(width: 2,),
-                  CircleAvatar(
-                    backgroundImage: null,
-                    maxRadius: 20,
+                  FutureBuilder(
+                    future: auth.getPeerImageUrl(peerId, peerAvatar),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<String> snapshot) {
+                      return Container(
+                        // padding: paddingRight20,
+                        child: CircleAvatar(
+                          radius: 25,
+                          backgroundImage: (snapshot.data == null)
+                              ? null
+                              : NetworkImage(snapshot.data!),
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(width: 12,),
                   Expanded(
@@ -192,7 +209,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       child: Container(
         padding: EdgeInsets.only(left: 10,bottom: 10,top: 10),
         height: 60,
-        width: double.infinity,
+        width: screenWidth(context), // changed
         color: appBarColor,
         child: Row(
           children: <Widget>[
@@ -238,6 +255,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> sendMessage(String message) async {
+    print("sending 1 ********************");
     ///Check if message is empty or not
     // print("the message is $message");
     if (message.trim() != '') {
@@ -264,10 +282,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       String time = DateTime.now().millisecondsSinceEpoch.toString();
 
       ///Add myself to peer's list of contacts in the first spot of the list
-      updateMessageAlert(message, time, peerId, userId, userName);
+      updateMessageAlert(message, time, peerId, userId, userName, false);
 
       ///Add peer to my list of contacts in the first spot of the list
-      updateMessageAlert(message, time, userId, peerId, peerName);
+      updateMessageAlert(message, time, userId, peerId, peerName, true);
 
       ///Make a message document in firebase
       db.collection('messages').doc(chatRoomId).collection(chatRoomId)
@@ -307,7 +325,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             width: screenWidth(context) * 0.023 * 6 *4,
             decoration: BoxDecoration(
                 color: myTextBackgroundColor,
-                borderRadius: BorderRadius.circular(20.0)),
+                borderRadius: BorderRadius.only(
+                    topLeft:Radius.circular(20),
+                    topRight:Radius.zero,
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20))),
             margin: EdgeInsets.only(
               bottom: screenWidth(context) * 0.023 * 6/5,
               right: screenWidth(context) * 0.023 * 6/5,
@@ -343,7 +365,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               width: s50(context)*4,
               decoration: BoxDecoration(
                   color: peerTextBackgroundColor,
-                  borderRadius: BorderRadius.circular(20.0)),
+                  borderRadius: BorderRadius.only(
+                      topLeft:Radius.zero,
+                      topRight:Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20))),
               margin: EdgeInsets.only(left: s10(context)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -380,25 +406,26 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   // other- the user that i add for him the last message with me
   Future<void> updateMessageAlert(String message, String time, String other,
-      String me, String meName) async {
-    ///delete the document of peer in the current user data
-    var map=await db.collection('messageAlert').doc(other).get();
-    late List oldMap;
-    try {
-      oldMap = map['users'];
-      oldMap.removeWhere((element) => element['id']==me);
-    }catch(e){
-      print(e);
-      oldMap = [];
-    }
-    List newMap=[{
+      String me, String meName, bool seen) async {
+    var data = {
       'id': me,
       'name': meName,
       'lastMessage': message,
       'timestamp': time,
-      'seen': false,
-    }];
-    newMap.addAll(oldMap);
-    db.collection('messageAlert').doc(other).set({'users':newMap});
+      'seen': seen ,
+    };
+
+    await db.collection('messageAlert').doc(other).collection('Peers').doc(me).set(data);
+
+  }
+
+  UserEnterRoom(String chatRoom){
+    db.collection('messages').doc(chatRoomId).collection('users').doc(userId).set(
+        {'in':true}
+    );
+  }
+
+  UserLeavesroom(String chatRoom){
+    db.collection('messages').doc(chatRoomId).collection('users').doc(userId).delete();
   }
 }

@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen>
               children: <Widget>[
                 Scaffold(
                   resizeToAvoidBottomInset: true,
-                  backgroundColor: blue2,
+                  backgroundColor: blue7,
                   appBar: AppBar(
                     centerTitle: true,
                     backgroundColor: green11,
@@ -46,24 +46,48 @@ class _ChatScreenState extends State<ChatScreen>
                     title: getText("Chat", Colors.white, 30, true),
                   ),
                   body: Container(
-                    child: FutureBuilder(
-                      future: db.collection('messageAlert').doc(auth.user!.uid).get(),
-                      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                        if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: db.collection('messageAlert').doc(auth.user!.uid)
+                          .collection('Peers').orderBy('timestamp', descending: true).snapshots(),
+                      builder: (context, snapshot) {
+                        if(!snapshot.hasData){ // ?????
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
-                        }else{
-                          return ListView.builder(
-                              padding: EdgeInsets.all(
-                                  MediaQuery.of(context).size.width * 0.020),
-                              itemCount: snapshot.data['users'].length,
-                              itemBuilder: (context, index){
-                                var peersList = snapshot.data['users'][index]; //this
-                                return buildListCard(peersList, index);
-                              });
                         }
-                    },
+                        if (snapshot.data!.docs.isEmpty) {
+                          return ListView(
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  getSizeBox(screenHeight(context)*0.08),
+                                  /*getText("You haven't chat with anyone",
+                                      green11, 18, true),*/
+                                  getText("sorry, no messages to show",
+                                      Colors.grey.shade600, 18, true),
+                                  getSizeBox(screenHeight(context)*0.05),
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 500),
+                                    // height: screenHeight(context)*0.75,
+                                    width: screenWidth(context)*0.9,
+                                    child: Image.asset('assets/images/no-search-results.gif'),),
+                                ],
+                              ),
+                            ],
+                          );
+                        } else {
+                          int index = 0;
+                          return ListView(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.020),
+                            children: snapshot.data!.docs.map((doc){
+                              index++;
+                              return buildListCard(doc, index);
+                            }).toList(),
+                          );
+                        }
+                      }
                     ),
                   ),
                 ),
@@ -73,20 +97,18 @@ class _ChatScreenState extends State<ChatScreen>
 
   }
 
-  Widget buildListCard(Map peers, int position){
-    String peerId = peers['id'];
-    String name=peers['name'];
-    String lastMessage = peers['lastMessage'];
-    String message_time = peers['timestamp'];
+  Widget buildListCard(QueryDocumentSnapshot doc, int position){
+    String peerId = doc.get('id');
+    // await auth.getUserFullName(peerId)
+    String name=doc.get('name'); // TODO to get the full name
+    String lastMessage = doc.get('lastMessage');
+    String message_time = doc.get('timestamp');
+    bool seen = doc.get('seen');
 
     DateTime message_date = DateTime.fromMillisecondsSinceEpoch(
         int.parse(message_time));
     Duration diff = DateTime.now().difference(message_date);
     String stringTimeAgo = getDifference(diff);
-
-    String imageUrl =
-        "https://ui-avatars.com/api/?bold=true&background=random&name=" +
-            name;
 
     return AnimationConfiguration.staggeredList(
         position: position,
@@ -97,48 +119,39 @@ class _ChatScreenState extends State<ChatScreen>
             child: Container(
               padding: EdgeInsets.only(bottom: s10(context)),
               child: MaterialButton(
-                color: blue5,
+                color: blue4,
                 padding: getPaddingAll(s10(context)),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(s10(context))),
                 onPressed: () {
+                  var uidd = auth.user!.uid;
+                  db.collection('messageAlert').doc(uidd).collection('Peers').doc(peerId).update({'seen':true});
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ChatRoomScreen(
-                      userId: auth.user!.uid,
-                      userName: auth.fullName,
+                      userId: uidd,
+                      userName: auth.fullName, // TODO
                       peerId: peerId,
                       peerName: name,
-                      peerAvatar: '',
+                      peerAvatar: getNameAvatar(name),
                     );
                   })).then((_) => f_reload());
                 },
                 child: Row(
                   children: [
                     // the image
-                    Material(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      clipBehavior: Clip.hardEdge,
-                      child: imageUrl != ''
-                          ? CachedNetworkImage( // TODO
-                        placeholder: (context, url) => Container(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(green11),
+                    FutureBuilder(
+                      future: auth.getPeerImageUrl(peerId, getNameAvatar(name)),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        return Container(
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: (snapshot.data == null)
+                                ? null
+                                : NetworkImage(snapshot.data!),
                           ),
-                          width: s50(context) * 1.2,
-                          height: s50(context) * 1.2,
-                          padding: EdgeInsets.all(s5(context) * 3),
-                        ),
-                        imageUrl: imageUrl,
-                        width: s50(context) * 1.2,
-                        height: s50(context) * 1.2,
-                        fit: BoxFit.cover,
-                      )
-                          : Icon(
-                        Icons.account_circle,
-                        size: s50(context),
-                        color: Colors.grey,
-                      ),
+                        );
+                      },
                     ),
                     // by column we need the name & last message
                     Flexible(
@@ -147,30 +160,13 @@ class _ChatScreenState extends State<ChatScreen>
                           margin: EdgeInsets.only(left: s10(context)),
                           child: Column(
                             children: [
+                              // getText(name, green11, 22, true),
                               Text(name,
                                 maxLines: 1,
                                 style: TextStyle(
                                     fontSize: 22,
-                                    color: Colors.white,
+                                    color: green11,
                                     fontWeight: FontWeight.w900,
-                                    shadows: [
-                                      Shadow(
-                                        // bottomLeft
-                                          offset: Offset(-1, -1),
-                                          color: green11),
-                                      Shadow(
-                                        // bottomRight
-                                          offset: Offset(1, -1),
-                                          color: green11),
-                                      Shadow(
-                                        // topRight
-                                          offset: Offset(1, 1),
-                                          color: green11),
-                                      Shadow(
-                                        // topLeft
-                                          offset: Offset(-1, 1),
-                                          color: green11),
-                                    ],
                                 ),
                               ),
                               Text(lastMessage,
@@ -187,9 +183,26 @@ class _ChatScreenState extends State<ChatScreen>
                       ),
                     ),
                     // time passed
-                    Container(
-                      // padding: EdgeInsets.only(left: 10.0 , right: 10.0),
-                      child: getText(stringTimeAgo, green11, 11 , false),
+                    Column(
+                      children: [
+                        seen ? Container() : /*Icon(Icons.circle, color: lightGreen1),*/
+                        GradientIcon(
+                          Icons.circle,
+                          25.0,
+                          LinearGradient(
+                            colors: <Color>[
+                              green11,
+                              lightGreen1,
+                              green2,
+                              green11,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        getSizeBox(5),
+                        getText(stringTimeAgo, green11, 11 , false),//TODO
+                      ],
                     ),
                   ],
                 ),
@@ -199,146 +212,6 @@ class _ChatScreenState extends State<ChatScreen>
         ),);
   }
 
-  Widget buildListTile(BuildContext context, Map listItem,
-      /*AsyncSnapshot<String> imageUrlAsync,*/int index) {
-
-    String name=listItem['name'];
-    String lastMessage = listItem['lastMessage'];
-    String time = listItem['timestamp'];
-    /*
-    late String imageUrl;
-    try{
-      imageUrl = imageUrlAsync.data!;
-    }catch(e){
-      print(e);
-      //if (imageUrl == null)
-      imageUrl =
-          "https://ui-avatars.com/api/?bold=true&background=random&name=" +
-              name;
-    }
-     */
-    String? imageUrl = null;
-    if (imageUrl == null) {
-      imageUrl =
-          "https://ui-avatars.com/api/?bold=true&background=random&name=" +
-              name;
-    }
-
-    return Container(
-      padding: EdgeInsets.only(bottom: s10(context)),
-      child: FlatButton(
-        color: blue5,
-        padding: EdgeInsets.fromLTRB(
-            s25(context), s10(context), s25(context), s10(context)),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(s10(context))),
-        onPressed: () {
-          setState(() {
-            // this.userID = userID;
-            // this.peerId=listItem['id'];
-            // this.peerName = listItem['name'];
-            // this.imageUrl = imageUrl;
-            // this.lastMessage = lastMessage;
-            // this.inChat = true;
-          });
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return ChatRoomScreen(
-              userId: auth.user!.uid,
-              userName: auth.fullName,
-              peerId: listItem['id'],
-              peerName: listItem['name'],
-              peerAvatar: '',
-            );
-          }));
-        },
-        child: Row(
-          children: [
-            // the image of peerId
-            Material(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-              clipBehavior: Clip.hardEdge,
-              child: imageUrl != ''
-                  ? CachedNetworkImage( // TODO
-                placeholder: (context, url) => Container(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(green11),
-                  ),
-                  width: s50(context) * 1.2,
-                  height: s50(context) * 1.2,
-                  padding: EdgeInsets.all(s5(context) * 3),
-                ),
-                imageUrl: imageUrl,
-                width: s50(context) * 1.2,
-                height: s50(context) * 1.2,
-                fit: BoxFit.cover,
-              )
-                  : Icon(
-                Icons.account_circle,
-                size: s50(context),
-                color: Colors.grey,
-              ),
-            ),
-            Flexible(
-              child: Container(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                            MediaQuery.of(context).size.width * 0.01),
-                        child: Column(
-                          children: [
-                            Text(
-                              name,
-                              maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      // bottomLeft
-                                        offset: Offset(-1, -1),
-                                        color: green11),
-                                    Shadow(
-                                      // bottomRight
-                                        offset: Offset(1, -1),
-                                        color: green11),
-                                    Shadow(
-                                      // topRight
-                                        offset: Offset(1, 1),
-                                        color: green11),
-                                    Shadow(
-                                      // topLeft
-                                        offset: Offset(-1, 1),
-                                        color: green11),
-                                  ],
-                                  fontWeight: FontWeight.w900),
-                            ),
-                            getText(lastMessage, green11, 15, false),
-                          ],
-                        ),
-                      ),
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(
-                          s10(context), 0.0, 0.0, s5(context)),
-                    ),
-                  ],
-                ),
-                margin: EdgeInsets.only(left: s10(context)),
-              ),
-            ),
-            getText(
-                DateFormat('kk:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(time))),
-                green11, 15 , false),
-          ],
-        ),
-      ),
-    );
-  }
-
   void f_reload() {
     setState(() {});
   }
@@ -346,4 +219,35 @@ class _ChatScreenState extends State<ChatScreen>
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+}
+
+class GradientIcon extends StatelessWidget {
+  GradientIcon(
+      this.icon,
+      this.size,
+      this.gradient,
+      );
+
+  final IconData icon;
+  final double size;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      child: SizedBox(
+        width: size * 1.2,
+        height: size * 1.2,
+        child: Icon(
+          icon,
+          size: size,
+          color: Colors.white,
+        ),
+      ),
+      shaderCallback: (Rect bounds) {
+        final Rect rect = Rect.fromLTRB(0, 0, size, size);
+        return gradient.createShader(rect);
+      },
+    );
+  }
 }

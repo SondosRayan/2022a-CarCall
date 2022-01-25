@@ -62,9 +62,29 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                     stream: db.collection('Users').doc(auth.user!.uid)
                         .collection('Alerts').orderBy('timestamp', descending: true).snapshots(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      if(!snapshot.hasData){ // ?????
                         return const Center(
                           child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (snapshot.data!.docs.isEmpty) {
+                        return ListView(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                getSizeBox(screenHeight(context)*0.08),
+                                getText("No alerts to show",
+                                    Colors.grey.shade600, 18, true),
+                                getSizeBox(screenHeight(context)*0.05),
+                                AnimatedContainer(
+                                  duration: Duration(milliseconds: 500),
+                                  // height: screenHeight(context)*0.75,
+                                  width: screenWidth(context)*0.9,
+                                  child: Image.asset('assets/images/notifications.gif'),),
+                              ],
+                            ),
+                          ],
                         );
                       } else {
                         return ListView(
@@ -136,13 +156,33 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                   ),
                   StreamBuilder<QuerySnapshot>(
                     stream: db.collection('Users').doc(auth.user!.uid)
-                        .collection('Offers').snapshots(),
+                        .collection('Offers').orderBy('timestamp', descending: true).snapshots(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      if(!snapshot.hasData){ // ?????
                         return const Center(
                           child: CircularProgressIndicator(),
                         );
-                      } else {
+                      }
+                      if (snapshot.data!.docs.isEmpty) {
+                        return ListView(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                getSizeBox(screenHeight(context)*0.08),
+                                getText("No help offers to show",
+                                    Colors.grey.shade600, 18, true),
+                                getSizeBox(screenHeight(context)*0.05),
+                                AnimatedContainer(
+                                  duration: Duration(milliseconds: 500),
+                                  // height: screenHeight(context)*0.75,
+                                  width: screenWidth(context)*0.9,
+                                  child: Image.asset('assets/images/notifications.gif'),),
+                              ],
+                            ),
+                          ],
+                        );
+                      }  else {
                         return ListView(
                           children: snapshot.data!.docs.map((doc){
                             Timestamp notification_time = doc.get('timestamp');
@@ -167,16 +207,20 @@ class _NotificationsScreenState extends State<NotificationsScreen>{
                                   children: [
                                     ListTile(
                                         trailing: IconButton(icon: Icon(Icons.chat),color: green11,
-                                          onPressed: () {
+                                          onPressed: () async {
+                                            var uidd = auth.user!.uid;
+                                            var peerId = doc.get('sender');
+                                            var peerName = await auth.getUserFullName(doc.get('sender'));
+                                            db.collection('messageAlert').doc(uidd).collection('Peers').doc(peerId).update({'seen':true});
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(builder: (context) =>
                                                   ChatRoomScreen(
                                                     userId: auth.user!.uid,
                                                     userName: auth.fullName,
-                                                    peerId: doc.get('sender'),
-                                                    peerName: doc.get('sender_name'),
-                                                    peerAvatar: "",) //TODO
+                                                    peerId: peerId,
+                                                    peerName: peerName,
+                                                    peerAvatar: getNameAvatar(doc.get('sender_name')),) //TODO
                                               ),
                                             );
                                           },

@@ -12,20 +12,22 @@ class MyNavigationBar extends StatefulWidget {
   MyNavigationBar({Key? key, required this.index}) : super(key: key);
 
   @override
-  _MyNavigationBarState createState() => _MyNavigationBarState(index: index);
+  _MyNavigationBarState createState() => _MyNavigationBarState(selectedIndex: index);
 }
 
 class _MyNavigationBarState extends State<MyNavigationBar> {
-  _MyNavigationBarState({Key? key, required this.index});
-  int index;
-  late int _selectedIndex;
+  _MyNavigationBarState({Key? key, required this.selectedIndex});
+  //int index =0;
+  int selectedIndex = 0;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _selectedIndex = index;
+    //setState(() {
+    //  selectedIndex = index;
+    //});
   }
-  final PageController _pageController = PageController();
+  //final PageController _pageController = PageController();
   final List<Widget> _screens =[
     const MyHomePage(), ChatScreen(), const RequestsScreen(),
     const NotificationsScreen(),const ProfileScreen()
@@ -33,72 +35,78 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
 
   void _onPageChanged(int index) {
     setState(() {
-      _selectedIndex = index;
+      selectedIndex = index;
     });
   }
 
-  void _onItemTapped(int selectedIndex){
+  void _onItemTapped(int index){
     // print(selectedIndex);
-    _pageController.jumpToPage(selectedIndex);
+    setState(() {
+      selectedIndex = index;
+    });
+    //_pageController.jumpToPage(selectedIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        children: _screens,
-        onPageChanged: _onPageChanged,
-        physics: const NeverScrollableScrollPhysics(),
+      body: Center(
+        child: _screens.elementAt(selectedIndex),
       ),
+      //body: PageView(
+      //  controller: _pageController,
+      //  children: _screens,
+      //  onPageChanged: _onPageChanged,
+      //  physics: const NeverScrollableScrollPhysics(),
+      //),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           // sets the background color of the `BottomNavigationBar`
             canvasColor: green11), // sets the inactive color of the `BottomNavigationBar`,
         child: BottomNavigationBar(
           onTap: _onItemTapped,
-          currentIndex: _selectedIndex,
+          currentIndex: selectedIndex,
           selectedItemColor: Colors.white,
           type: BottomNavigationBarType.fixed, // added
           items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.home,
-                  color: _selectedIndex==0 ? Colors.white : Colors.black
-                ),
-                label: 'Home',
-                /*title: Text("Home",
+              icon: Icon(Icons.home,
+                  color: selectedIndex==0 ? Colors.white : Colors.black
+              ),
+              label: 'Home',
+              /*title: Text("Home",
                     style:TextStyle(color: _selectedIndex==0 ? Colors.white : Colors.black))*/
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.chat,
-                  color: _selectedIndex==1 ? Colors.white : Colors.black
-                ),
-                label: 'Chat',
-                /*title: Text("Chat",
+              icon: Icon(Icons.chat,
+                  color: selectedIndex==1 ? Colors.white : Colors.black
+              ),
+              label: 'Chat',
+              /*title: Text("Chat",
                     style:TextStyle(color: _selectedIndex==1 ? Colors.white : Colors.black))*/
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.menu,
-                color: _selectedIndex==2 ? Colors.white : Colors.black
+                  color: selectedIndex==2 ? Colors.white : Colors.black
               ),
-                label: 'Requests',
-                /*title: Text("Requests",
+              label: 'Requests',
+              /*title: Text("Requests",
                     style:TextStyle(color: _selectedIndex==2 ? Colors.white : Colors.black))*/
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.notifications,
-                color: _selectedIndex==3 ? Colors.white : Colors.black
+                  color: selectedIndex==3 ? Colors.white : Colors.black
               ),
-                label: 'Notifications',
-                /*title: Text("Notifications",
+              label: 'Notifications',
+              /*title: Text("Notifications",
                     style:TextStyle(color: _selectedIndex==3 ? Colors.white : Colors.black))*/
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person,
-                color: _selectedIndex==4 ? Colors.white : Colors.black
+                  color: selectedIndex==4 ? Colors.white : Colors.black
               ),
-                label: 'Profile',
-                /*title: Text("Profile",
+              label: 'Profile',
+              /*title: Text("Profile",
                     style:TextStyle(color: _selectedIndex==4 ? Colors.white : Colors.black))*/
             ),
           ],),

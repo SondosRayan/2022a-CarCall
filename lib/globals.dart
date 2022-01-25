@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 
+
+getNameAvatar(name) {
+  if(name == null ){
+    return '';
+  }
+  return "https://ui-avatars.com/api/?bold=true&background=random&name=" +
+      name;
+}
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+
 screenWidth(context) => MediaQuery.of(context).size.width;
+screenHeight(context) => MediaQuery.of(context).size.height;
 // delete
 s50(context) => screenWidth(context) * 0.020 * 6;
 s25(context) => s50(context) / 2;
@@ -19,6 +31,8 @@ Color blue4 = const Color.fromRGBO(157,201,207,1); //#9DC9CF
 Color blue5 = const Color.fromRGBO(123,191,200,1); //#7BBFC8
 Color blue6 = const Color.fromRGBO(95,157,165,1);  //#5F9DA5
 
+Color blue7 = const Color.fromRGBO(225,247,255,1);  //
+// const seenColor = const Color.fromRGBO(40,162,167,1);//#28A2A7
 // TextStyle
 Text getText(String text, Color color ,double fontSize, bool isBold/*, {bool isCenter=true}*/) {
   return Text(text,
@@ -55,6 +69,7 @@ EdgeInsets getPaddingAll(double x){
 
 // Numbers
 double imageRadius = 50.0;
+double my_radius=20.0;
 
 // Box
 SizedBox box = const SizedBox(height: 20.0);

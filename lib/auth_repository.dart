@@ -1,12 +1,16 @@
 import 'dart:io';
+import 'package:car_call/globals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dataBase.dart';
+import 'dart:async';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 
 
 enum Status { Authenticated, Unauthenticated, Authenticating, Authenticating2 }
@@ -136,6 +140,7 @@ class AuthRepository with ChangeNotifier {
           .createUserWithEmailAndPassword(
           email: email, password: password);
       notifyListeners();
+
       return userCredential;
     } catch (e) {
       print(e);
@@ -229,6 +234,9 @@ class AuthRepository with ChangeNotifier {
   // END OF SIGN IN FUNCTIONS
   /////////////////////////////////////////////////////////////////////////////
   Future signOut() async {
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      await this.removeToken(token!);
+    });
     _auth.signOut();
     _status = Status.Unauthenticated;
     notifyListeners();
@@ -246,21 +254,40 @@ class AuthRepository with ChangeNotifier {
     await updateLocalUserFields();
     notifyListeners();
   }
-
   Future<String> getImageUrl() async {
-    // var res = await _storage.ref('images').child(_user!.uid).getDownloadURL();
-    // if(res.isEmpty){
-      if(_gender == "Female") return femaleDefaultAvatar;
-      else if(_gender == "Male") return maleDefaultAvatar;
-    // }
-    return _avatarURL;
+    var res="";
+    try{
+      res = await _storage.ref('images').child(_user!.uid).getDownloadURL();
+      return res;
+    }
+    catch(e){
+      res = getNameAvatar(fullName);
+    }
+    return res;
+  }
+
+  Future<String> getPeerImageUrl(String peerId, String nameImage) async {
+    String res = nameImage;
+    try{
+      res = await _storage.ref('images').child(peerId).getDownloadURL();
+      return res;
+    }
+    catch(e){
+      print(e);
+    }
+    return res;
   }
 
   Future<void> uploadNewImage(File file) async {
-    await _storage
-        .ref('images')
-        .child(_user!.uid)
-        .putFile(file);
+    print("upload image **************");
+    try {
+      await _storage
+          .ref('images')
+          .child(_user!.uid)
+          .putFile(file);
+    } catch(e){
+      print("error in upload image **************");
+    }
     notifyListeners();
   }
 
@@ -345,6 +372,13 @@ class AuthRepository with ChangeNotifier {
     return _field_value;
   }
 
+  Future<String> getUserFullName(String uidd)async{
+
+    return await getUserDetail(uidd,'first_name') + " "
+        + await getUserDetail(uidd,'last_name');
+  }
+
+
   Future<void> addToken(String token) async {
 
     if(token == null) {
@@ -387,6 +421,45 @@ class AuthRepository with ChangeNotifier {
     _phoneNumber = list['Info'][4];
     _carPlate = list['Info'][5];
   }
+
+  Future<void> removeToken(String token) async {
+
+    if(token == null) {
+      print('!!!!! Token Is Null !!!!!');
+      return;
+    }
+    await _firebaseFirestore.collection('Tokens').doc(token).delete();
+    await _firebaseFirestore.collection('Users').doc(user!.uid).collection('tokens').doc(token).delete();
+    print("Token Removed Successfully!\n token : $token");
+  }
+
+  void updateProfile(String firstName, String lastName,
+      String phoneNumber, String carPlate) async {
+    String oldCarPlate = _carPlate;
+    try {
+      _firstName = firstName;
+      _lastName = lastName;
+      _phoneNumber = phoneNumber;
+      _carPlate = carPlate;
+      await _firebaseFirestore.collection('Cars').doc(oldCarPlate).delete();
+      await updateFirebaseUserList();
+      notifyListeners(); // ????
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  /*
+  Future<String> onStartUp() async {
+    String retVal = "error";
+    try{
+      var _firebaseUser = await _auth.currentUser;
+
+    }catch(e){
+      print(e);
+    }
+    return retVal;
+  }*/
 
 }
 

@@ -117,7 +117,7 @@ class AlertOptionScreen extends StatelessWidget {
   }
 
   _showDialog(BuildContext context, bool found){
-    String found_text = "An alert was successully sent.";
+    String found_text = "An alert was successfully sent.";
     String not_found_text = "Sorry! car owner was not found.";
     String dialog_text = found? found_text: not_found_text;
     return showDialog<void>(

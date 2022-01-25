@@ -13,12 +13,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '3'
+    flutterVersionCode = '6'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '2.0.1'
+    flutterVersionName = '2.0.4'
 }
 
 apply plugin: 'com.android.application'
@@ -54,8 +54,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         multiDexEnabled true
-        versionCode 3
-        versionName "2.0.1"
+        versionCode 6
+        versionName "2.0.4"
     }
 
     signingConfigs {
@@ -90,5 +90,5 @@ dependencies {
 
     // Also declare the dependency for the Google Play services library and specify its version
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
-
+    implementation 'com.google.firebase:firebase-messaging:20.1.0'
 }

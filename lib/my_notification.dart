@@ -65,7 +65,7 @@ class myNotification{
   }
 
   Future<void> SendHelpOffer() async {
-    String sender_name = await auth.getUserDetail(sender_id, 'first_name');
+    String sender_name = await auth.getUserFullName(sender_id);
     _data = {
       'type': _type,
       'sender': sender_id,

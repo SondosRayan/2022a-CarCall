@@ -27,7 +27,8 @@ class _BlockedScreenState extends State<BlockedScreen> {
       backgroundColor: blue1,
       appBar: AppBar(
         backgroundColor: green11,
-        title: const Text('Blocked'),
+        title: getText('Blocked', Colors.white, 30, true),
+        // const Text('Blocked'),
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(

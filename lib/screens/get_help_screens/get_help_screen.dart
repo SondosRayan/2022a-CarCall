@@ -97,7 +97,9 @@ class GetHelpScreen extends StatelessWidget {
                     myNotification m = myNotification(NotificationTitle.HelpRequest, helpOption,
                         FirebaseAuth.instance.currentUser!.uid, "","$lat,$lon");
                     await m.BroadCastHelpRequest();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 0,)));
+                    Navigator.of(context).pop();
+                    _showDialog(context);
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyNavigationBar(index: 0,)));
                     // to show another dialog for the GPS
                   },
                 ),
@@ -115,6 +117,34 @@ class GetHelpScreen extends StatelessWidget {
       },
     );
   }
+
+  _showDialog(BuildContext context){
+    String text = "Your request was successfully sent.";
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context)
+        {
+          return AlertDialog(
+            content: SingleChildScrollView(
+                child: Text(text)
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Ok', style: TextStyle(color: green11),),
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(context,
+                      MaterialPageRoute(builder: (context) =>
+                          MyNavigationBar(index: 0)), (route) => false);
+                },
+              ),
+            ],
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          );
+        });
+  }
+
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;

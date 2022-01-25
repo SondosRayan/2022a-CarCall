@@ -18,4 +18,5 @@
 * [ ] Blocking annoying or disrespectful users.
 
 Contents provided in docs folder:
-* [ ] database
+1. [Database](docs/database.md)
+2. [Setup](docs/setup.md)
